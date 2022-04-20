@@ -1,0 +1,3 @@
+name: talos-em
+runtime: go
+description: Talos Cluster on Equinix Metal

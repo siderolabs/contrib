@@ -1,0 +1,4 @@
+- op: add
+  path: /machine/kubelet/extraArgs
+  value:
+      volume-stats-agg-period: -1s

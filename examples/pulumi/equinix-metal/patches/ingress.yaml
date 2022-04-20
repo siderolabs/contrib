@@ -1,0 +1,7 @@
+- op: add
+  path: /machine/kubelet
+  value:
+    extraArgs:
+      volume-stats-agg-period: -1s
+      register-with-taints: dedicated=ingress:NoSchedule
+      node-labels: node.kubernetes.io/role=ingress
