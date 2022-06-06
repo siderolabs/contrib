@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/frezbo/pulumi-provider-talos/sdk/go/talos"
 	"github.com/pulumi/pulumi-azure/sdk/v5/go/azure/compute"
 	"github.com/pulumi/pulumi-azure/sdk/v5/go/azure/core"
 	"github.com/pulumi/pulumi-azure/sdk/v5/go/azure/lb"
@@ -9,6 +8,7 @@ import (
 	"github.com/pulumi/pulumi-azure/sdk/v5/go/azure/storage"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
+	"github.com/siderolabs/pulumi-provider-talos/sdk/go/talos"
 )
 
 const (
@@ -45,7 +45,8 @@ type ResourceInfo struct {
 	LBPubIP             *network.PublicIp
 	LBBackendPool       *lb.BackendAddressPool
 
-	TalosClusterConfig *talos.ClusterConfig
+	TalosClusterConfig  *talos.ClusterConfig
+	TalosClusterSecrets *talos.ClusterSecrets
 }
 
 func (ri *ResourceInfo) createRG(ctx *pulumi.Context) error {
@@ -131,7 +132,7 @@ func main() {
 		}
 
 		// Create Talos configs
-		err = ri.createTalosConfigs(ctx)
+		err = ri.createConfigs(ctx)
 		if err != nil {
 			return err
 		}
@@ -156,7 +157,7 @@ func main() {
 
 		ctx.Export("loadBalancerIP", ri.LBPubIP.IpAddress)
 		ctx.Export("controlPlaneIPs", ri.CPPubIPs)
-		ctx.Export("talosConfig", ri.TalosClusterConfig.TalosConfig)
+		ctx.Export("talosConfig", ri.TalosClusterSecrets.TalosConfig)
 
 		return nil
 	})

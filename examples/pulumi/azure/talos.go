@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/frezbo/pulumi-provider-talos/sdk/go/talos"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
+	"github.com/siderolabs/pulumi-provider-talos/sdk/go/talos"
 )
 
-func (ri *ResourceInfo) createTalosConfigs(ctx *pulumi.Context) error {
+func (ri *ResourceInfo) createConfigs(ctx *pulumi.Context) error {
 	clusterSecrets, err := talos.NewClusterSecrets(
 		ctx,
 		ClusterName+"-cluster-secrets",
@@ -28,6 +28,7 @@ func (ri *ResourceInfo) createTalosConfigs(ctx *pulumi.Context) error {
 		return err
 	}
 
+	ri.TalosClusterSecrets = clusterSecrets
 	ri.TalosClusterConfig = cc
 
 	return nil
@@ -40,7 +41,7 @@ func (ri *ResourceInfo) bootstrapTalos(ctx *pulumi.Context) error {
 		&talos.NodeBootstrapArgs{
 			Endpoint:    ri.CPPubIPs[0],
 			Node:        ri.CPPubIPs[0],
-			TalosConfig: ri.TalosClusterConfig.TalosConfig,
+			TalosConfig: ri.TalosClusterSecrets.TalosConfig,
 		})
 	if err != nil {
 		return err
