@@ -3,4 +3,5 @@ go 1.18
 use (
 	./examples/pulumi/azure
 	./examples/pulumi/equinix-metal
+	./examples/pulumi/gcp
 )

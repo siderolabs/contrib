@@ -1,0 +1,3 @@
+name: gcp
+runtime: go
+description: Talos on GCP
