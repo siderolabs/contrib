@@ -14,3 +14,4 @@ The examples provided are maintained on a best effort basic and please file issu
 
 - [hcloud](./examples/terraform/hcloud)
 - [vultr](./examples/terraform/vultr)
+- [AWS](./examples/terraform/aws)
