@@ -25,11 +25,11 @@ resource "talos_machine_configuration_apply" "cp_config_apply" {
   endpoint              = each.key
   node                  = each.key
   config_patches = [
-    templatefile("${path.module}/templates/patch.yaml.tmpl", {
+    templatefile("${path.module}/templates/install-disk-and-hostname.yaml.tmpl", {
       hostname     = each.value.hostname == null ? format("%s-cp-%s", var.cluster_name, index(keys(var.node_data.controlplanes), each.key)) : each.value.hostname
       install_disk = each.value.install_disk
     }),
-    file("${path.module}/files/patch.json"),
+    file("${path.module}/files/cp-scheduling.yaml"),
   ]
 }
 
@@ -40,7 +40,7 @@ resource "talos_machine_configuration_apply" "worker_config_apply" {
   endpoint              = each.key
   node                  = each.key
   config_patches = [
-    templatefile("${path.module}/templates/patch.yaml.tmpl", {
+    templatefile("${path.module}/templates/install-disk-and-hostname.yaml.tmpl", {
       hostname     = each.value.hostname == null ? format("%s-worker-%s", var.cluster_name, index(keys(var.node_data.workers), each.key)) : each.value.hostname
       install_disk = each.value.install_disk
     })
