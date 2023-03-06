@@ -1,3 +1,14 @@
+locals {
+  common_machine_config_patch = {
+    machine = {
+      kubelet = {
+        registerWithFQDN = true
+      }
+    }
+  }
+}
+
+
 data "aws_availability_zones" "available" {
   state = "available"
 }
@@ -15,15 +26,15 @@ module "vpc" {
   name = var.cluster_name
   cidr = var.vpc_cidr
 
-  azs             = data.aws_availability_zones.available.names
-  public_subnets  = [for i, v in data.aws_availability_zones.available.names: cidrsubnet(var.vpc_cidr, 2, i)]
+  azs            = data.aws_availability_zones.available.names
+  public_subnets = [for i, v in data.aws_availability_zones.available.names : cidrsubnet(var.vpc_cidr, 2, i)]
 }
 
 module "cluster_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "~> 4.0"
 
-  name        = "${var.cluster_name}"
+  name        = var.cluster_name
   description = "Allow all intra-cluster and egress traffic"
   vpc_id      = module.vpc.vpc_id
 
@@ -65,8 +76,8 @@ module "elb_k8s_elb" {
   source  = "terraform-aws-modules/elb/aws"
   version = "~> 4.0"
 
-  name            = "${var.cluster_name}-k8s-api"
-  subnets         = module.vpc.public_subnets
+  name    = "${var.cluster_name}-k8s-api"
+  subnets = module.vpc.public_subnets
   security_groups = [
     module.cluster_sg.security_group_id,
     module.kubernetes_api_sg.security_group_id,
@@ -143,6 +154,9 @@ resource "talos_machine_configuration_controlplane" "this" {
   machine_secrets  = talos_machine_secrets.this.machine_secrets
   docs_enabled     = false
   examples_enabled = false
+  config_patches = [
+    yamlencode(locals.common_machine_config_patch)
+  ]
 }
 
 resource "talos_machine_configuration_worker" "this" {
@@ -151,6 +165,9 @@ resource "talos_machine_configuration_worker" "this" {
   machine_secrets  = talos_machine_secrets.this.machine_secrets
   docs_enabled     = false
   examples_enabled = false
+  config_patches = [
+    yamlencode(locals.common_machine_config_patch)
+  ]
 }
 
 resource "talos_machine_configuration_apply" "controlplane" {
