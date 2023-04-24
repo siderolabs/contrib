@@ -148,63 +148,66 @@ module "talos_worker_nodes" {
 
 resource "talos_machine_secrets" "this" {}
 
-resource "talos_machine_configuration_controlplane" "this" {
+data "talos_machine_configuration" "controlplane" {
   cluster_name     = var.cluster_name
   cluster_endpoint = "https://${module.elb_k8s_elb.elb_dns_name}"
+  machine_type     = "controlplane"
   machine_secrets  = talos_machine_secrets.this.machine_secrets
-  docs_enabled     = false
-  examples_enabled = false
+  docs             = false
+  examples         = false
   config_patches = [
-    yamlencode(locals.common_machine_config_patch)
+    yamlencode(local.common_machine_config_patch)
   ]
 }
 
-resource "talos_machine_configuration_worker" "this" {
+data "talos_machine_configuration" "worker" {
   cluster_name     = var.cluster_name
   cluster_endpoint = "https://${module.elb_k8s_elb.elb_dns_name}"
+  machine_type     = "worker"
   machine_secrets  = talos_machine_secrets.this.machine_secrets
-  docs_enabled     = false
-  examples_enabled = false
+  docs             = false
+  examples         = false
   config_patches = [
-    yamlencode(locals.common_machine_config_patch)
+    yamlencode(local.common_machine_config_patch)
   ]
 }
 
 resource "talos_machine_configuration_apply" "controlplane" {
   count = var.num_control_planes
 
-  talos_config          = talos_client_configuration.this.talos_config
-  machine_configuration = talos_machine_configuration_controlplane.this.machine_config
-  endpoint              = module.talos_control_plane_nodes[count.index].public_ip
-  node                  = module.talos_control_plane_nodes[count.index].private_ip
+  client_configuration        = talos_machine_secrets.this.client_configuration
+  machine_configuration_input = data.talos_machine_configuration.controlplane.machine_configuration
+  endpoint                    = module.talos_control_plane_nodes[count.index].public_ip
+  node                        = module.talos_control_plane_nodes[count.index].private_ip
 }
 
 resource "talos_machine_configuration_apply" "worker" {
   count = var.num_workers
 
-  talos_config          = talos_client_configuration.this.talos_config
-  machine_configuration = talos_machine_configuration_worker.this.machine_config
-  endpoint              = module.talos_worker_nodes[count.index].public_ip
-  node                  = module.talos_worker_nodes[count.index].private_ip
+  client_configuration        = talos_machine_secrets.this.client_configuration
+  machine_configuration_input = data.talos_machine_configuration.worker.machine_configuration
+  endpoint                    = module.talos_worker_nodes[count.index].public_ip
+  node                        = module.talos_worker_nodes[count.index].private_ip
 }
 
 resource "talos_machine_bootstrap" "this" {
   depends_on = [talos_machine_configuration_apply.controlplane]
 
-  talos_config = talos_client_configuration.this.talos_config
-  endpoint     = module.talos_control_plane_nodes.0.public_ip
-  node         = module.talos_control_plane_nodes.0.private_ip
+  client_configuration = talos_machine_secrets.this.client_configuration
+  endpoint             = module.talos_control_plane_nodes.0.public_ip
+  node                 = module.talos_control_plane_nodes.0.private_ip
 }
 
-resource "talos_client_configuration" "this" {
-  cluster_name    = var.cluster_name
-  machine_secrets = talos_machine_secrets.this.machine_secrets
-  endpoints       = module.talos_control_plane_nodes.*.public_ip
-  nodes           = flatten([module.talos_control_plane_nodes.*.private_ip, module.talos_worker_nodes.*.private_ip])
+data "talos_client_configuration" "this" {
+  cluster_name         = var.cluster_name
+  client_configuration = talos_machine_secrets.this.client_configuration
+  endpoints            = module.talos_control_plane_nodes.*.public_ip
+  nodes                = flatten([module.talos_control_plane_nodes.*.private_ip, module.talos_worker_nodes.*.private_ip])
 }
 
-resource "talos_cluster_kubeconfig" "this" {
-  talos_config = talos_client_configuration.this.talos_config
-  endpoint     = module.talos_control_plane_nodes.0.public_ip
-  node         = module.talos_control_plane_nodes.0.private_ip
+data "talos_cluster_kubeconfig" "this" {
+  client_configuration = talos_machine_secrets.this.client_configuration
+  endpoint             = module.talos_control_plane_nodes.0.public_ip
+  node                 = module.talos_control_plane_nodes.0.private_ip
+  wait                 = true
 }

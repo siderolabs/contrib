@@ -39,52 +39,52 @@ resource "vultr_load_balancer" "talos_lb" {
   }
 }
 
-resource "talos_machine_secrets" "machine_secrets" {}
+resource "talos_machine_secrets" "this" {}
 
-resource "talos_client_configuration" "talosconfig" {
-  cluster_name    = var.cluster_name
-  machine_secrets = talos_machine_secrets.machine_secrets.machine_secrets
-  endpoints       = vultr_instance.talos_control_plane[*].main_ip
+data "talos_client_configuration" "this" {
+  cluster_name         = var.cluster_name
+  client_configuration = talos_machine_secrets.this.client_configuration
+  endpoints            = vultr_instance.talos_control_plane[*].main_ip
 }
 
-resource "talos_machine_configuration_controlplane" "machineconfig_cp" {
+data "talos_machine_configuration" "controlplane" {
   cluster_name     = var.cluster_name
   cluster_endpoint = "https://${vultr_load_balancer.talos_lb.ipv4}:6443"
-  machine_secrets  = talos_machine_secrets.machine_secrets.machine_secrets
-  depends_on       = [vultr_load_balancer.talos_lb]
+  machine_type     = "controlplane"
+  machine_secrets  = talos_machine_secrets.this.machine_secrets
 }
 
-resource "talos_machine_configuration_apply" "cp_config_apply" {
-  talos_config          = talos_client_configuration.talosconfig.talos_config
-  machine_configuration = talos_machine_configuration_controlplane.machineconfig_cp.machine_config
-  count                 = length(vultr_instance.talos_control_plane)
-  endpoint              = vultr_instance.talos_control_plane[count.index].main_ip
-  node                  = vultr_instance.talos_control_plane[count.index].main_ip
+resource "talos_machine_configuration_apply" "controlplane" {
+  client_configuration        = talos_machine_secrets.this.client_configuration
+  machine_configuration_input = data.talos_machine_configuration.controlplane.machine_configuration
+  count                       = length(vultr_instance.talos_control_plane)
+  node                        = vultr_instance.talos_control_plane[count.index].main_ip
 }
 
-resource "talos_machine_configuration_worker" "machineconfig_worker" {
+data "talos_machine_configuration" "worker" {
   cluster_name     = var.cluster_name
   cluster_endpoint = "https://${vultr_load_balancer.talos_lb.ipv4}:6443"
-  machine_secrets  = talos_machine_secrets.machine_secrets.machine_secrets
-  depends_on       = [vultr_load_balancer.talos_lb]
+  machine_type     = "worker"
+  machine_secrets  = talos_machine_secrets.this.machine_secrets
 }
 
-resource "talos_machine_configuration_apply" "worker_config_apply" {
-  talos_config          = talos_client_configuration.talosconfig.talos_config
-  machine_configuration = talos_machine_configuration_worker.machineconfig_worker.machine_config
-  count                 = length(vultr_instance.talos_workers)
-  endpoint              = vultr_instance.talos_workers[count.index].main_ip
-  node                  = vultr_instance.talos_workers[count.index].main_ip
+resource "talos_machine_configuration_apply" "worker" {
+  client_configuration        = talos_machine_secrets.this.client_configuration
+  machine_configuration_input = data.talos_machine_configuration.worker.machine_configuration
+  count                       = length(vultr_instance.talos_workers)
+  node                        = vultr_instance.talos_workers[count.index].main_ip
 }
 
-resource "talos_machine_bootstrap" "bootstrap" {
-  talos_config = talos_client_configuration.talosconfig.talos_config
-  endpoint     = vultr_instance.talos_control_plane[0].main_ip
-  node         = vultr_instance.talos_control_plane[0].main_ip
+resource "talos_machine_bootstrap" "this" {
+  depends_on = [
+    talos_machine_configuration_apply.controlplane
+  ]
+
+  client_configuration = talos_machine_secrets.this.client_configuration
+  node                 = vultr_instance.talos_control_plane[0].main_ip
 }
 
-resource "talos_cluster_kubeconfig" "kubeconfig" {
-  talos_config = talos_client_configuration.talosconfig.talos_config
-  endpoint     = vultr_instance.talos_control_plane[0].main_ip
-  node         = vultr_instance.talos_control_plane[0].main_ip
+data "talos_cluster_kubeconfig" "this" {
+  client_configuration = talos_machine_secrets.this.client_configuration
+  node                 = vultr_instance.talos_control_plane[0].main_ip
 }

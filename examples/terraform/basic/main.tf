@@ -1,29 +1,30 @@
-resource "talos_machine_secrets" "machine_secrets" {}
+resource "talos_machine_secrets" "this" {}
 
-resource "talos_machine_configuration_controlplane" "machineconfig_cp" {
+data "talos_machine_configuration" "controlplane" {
   cluster_name     = var.cluster_name
   cluster_endpoint = var.cluster_endpoint
-  machine_secrets  = talos_machine_secrets.machine_secrets.machine_secrets
+  machine_type     = "controlplane"
+  machine_secrets  = talos_machine_secrets.this.machine_secrets
 }
 
-resource "talos_machine_configuration_worker" "machineconfig_worker" {
+data "talos_machine_configuration" "worker" {
   cluster_name     = var.cluster_name
   cluster_endpoint = var.cluster_endpoint
-  machine_secrets  = talos_machine_secrets.machine_secrets.machine_secrets
+  machine_type     = "worker"
+  machine_secrets  = talos_machine_secrets.this.machine_secrets
 }
 
-resource "talos_client_configuration" "talosconfig" {
-  cluster_name    = var.cluster_name
-  machine_secrets = talos_machine_secrets.machine_secrets.machine_secrets
-  endpoints       = [for k, v in var.node_data.controlplanes : k]
+data "talos_client_configuration" "this" {
+  cluster_name         = var.cluster_name
+  client_configuration = talos_machine_secrets.this.client_configuration
+  endpoints            = [for k, v in var.node_data.controlplanes : k]
 }
 
-resource "talos_machine_configuration_apply" "cp_config_apply" {
-  talos_config          = talos_client_configuration.talosconfig.talos_config
-  machine_configuration = talos_machine_configuration_controlplane.machineconfig_cp.machine_config
-  for_each              = var.node_data.controlplanes
-  endpoint              = each.key
-  node                  = each.key
+resource "talos_machine_configuration_apply" "controlplane" {
+  client_configuration        = talos_machine_secrets.this.client_configuration
+  machine_configuration_input = data.talos_machine_configuration.controlplane.machine_configuration
+  for_each                    = var.node_data.controlplanes
+  node                        = each.key
   config_patches = [
     templatefile("${path.module}/templates/install-disk-and-hostname.yaml.tmpl", {
       hostname     = each.value.hostname == null ? format("%s-cp-%s", var.cluster_name, index(keys(var.node_data.controlplanes), each.key)) : each.value.hostname
@@ -33,12 +34,11 @@ resource "talos_machine_configuration_apply" "cp_config_apply" {
   ]
 }
 
-resource "talos_machine_configuration_apply" "worker_config_apply" {
-  talos_config          = talos_client_configuration.talosconfig.talos_config
-  machine_configuration = talos_machine_configuration_worker.machineconfig_worker.machine_config
-  for_each              = var.node_data.workers
-  endpoint              = each.key
-  node                  = each.key
+resource "talos_machine_configuration_apply" "worker" {
+  client_configuration        = talos_machine_secrets.this.client_configuration
+  machine_configuration_input = data.talos_machine_configuration.controlplane.machine_configuration
+  for_each                    = var.node_data.workers
+  node                        = each.key
   config_patches = [
     templatefile("${path.module}/templates/install-disk-and-hostname.yaml.tmpl", {
       hostname     = each.value.hostname == null ? format("%s-worker-%s", var.cluster_name, index(keys(var.node_data.workers), each.key)) : each.value.hostname
@@ -47,14 +47,15 @@ resource "talos_machine_configuration_apply" "worker_config_apply" {
   ]
 }
 
-resource "talos_machine_bootstrap" "bootstrap" {
-  talos_config = talos_client_configuration.talosconfig.talos_config
-  endpoint     = [for k, v in var.node_data.controlplanes : k][0]
-  node         = [for k, v in var.node_data.controlplanes : k][0]
+resource "talos_machine_bootstrap" "this" {
+  depends_on = [talos_machine_configuration_apply.controlplane]
+
+  client_configuration = talos_machine_secrets.this.client_configuration
+  node                 = [for k, v in var.node_data.controlplanes : k][0]
 }
 
-resource "talos_cluster_kubeconfig" "kubeconfig" {
-  talos_config = talos_client_configuration.talosconfig.talos_config
-  endpoint     = [for k, v in var.node_data.controlplanes : k][0]
-  node         = [for k, v in var.node_data.controlplanes : k][0]
+data "talos_cluster_kubeconfig" "this" {
+  client_configuration = talos_machine_secrets.this.client_configuration
+  node                 = [for k, v in var.node_data.controlplanes : k][0]
+  wait                 = true
 }

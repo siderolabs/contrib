@@ -6,7 +6,7 @@ resource "azurerm_resource_group" "this" {
 resource "azurerm_storage_account" "this" {
   depends_on = [azurerm_resource_group.this]
 
-  name                     = replace(lower(var.cluster_name), "/[^0-9a-z]/", "") 
+  name                     = replace(lower(var.cluster_name), "/[^0-9a-z]/", "")
   resource_group_name      = azurerm_resource_group.this.name
   location                 = azurerm_resource_group.this.location
   account_tier             = "Standard"
@@ -24,11 +24,11 @@ resource "azurerm_storage_container" "this" {
 resource "azurerm_storage_blob" "this" {
   depends_on = [azurerm_resource_group.this]
 
-  name                    = "${var.cluster_name}.vhd"
-  storage_account_name    = azurerm_storage_account.this.name
-  storage_container_name  = azurerm_storage_container.this.name
-  type                    = "Page"
-  source                  = var.image_file  
+  name                   = "${var.cluster_name}.vhd"
+  storage_account_name   = azurerm_storage_account.this.name
+  storage_container_name = azurerm_storage_container.this.name
+  type                   = "Page"
+  source                 = var.image_file
 }
 
 resource "azurerm_image" "this" {
@@ -62,7 +62,7 @@ module "control_plane_sg" {
   source     = "Azure/network-security-group/azurerm"
   version    = "~> 3.0"
   depends_on = [azurerm_resource_group.this]
-  
+
   security_group_name   = var.cluster_name
   resource_group_name   = azurerm_resource_group.this.name
   source_address_prefix = [var.talos_api_allowed_cidr]
@@ -99,7 +99,7 @@ module "kubernetes_api_lb" {
   type                = "public"
   lb_sku              = "Standard"
   pip_sku             = "Standard"
-  
+
   lb_port = {
     k8sapi = ["443", "Tcp", "6443"]
   }
@@ -124,7 +124,7 @@ module "talos_control_plane_nodes" {
   vm_os_id                = azurerm_image.this.id
   storage_os_disk_size_gb = 100
   vnet_subnet_id          = module.vnet.vnet_subnets[0]
-  network_security_group  = {id = module.control_plane_sg.network_security_group_id}
+  network_security_group  = { id = module.control_plane_sg.network_security_group_id }
   source_address_prefixes = [var.talos_api_allowed_cidr]
 
   as_platform_fault_domain_count  = 3
@@ -161,53 +161,56 @@ module "talos_worker_nodes" {
 
 resource "talos_machine_secrets" "this" {}
 
-resource "talos_machine_configuration_controlplane" "this" {
+data "talos_machine_configuration" "controlplane" {
   cluster_name     = var.cluster_name
   cluster_endpoint = "https://${module.kubernetes_api_lb.azurerm_public_ip_address[0]}"
+  machine_type     = "controlplane"
   machine_secrets  = talos_machine_secrets.this.machine_secrets
 }
 
-resource "talos_machine_configuration_worker" "this" {
+data "talos_machine_configuration" "worker" {
   cluster_name     = var.cluster_name
   cluster_endpoint = "https://${module.kubernetes_api_lb.azurerm_public_ip_address[0]}"
+  machine_type     = "worker"
   machine_secrets  = talos_machine_secrets.this.machine_secrets
 }
 
-resource "talos_client_configuration" "this" {
-  cluster_name    = var.cluster_name
-  machine_secrets = talos_machine_secrets.this.machine_secrets
-  endpoints       = module.talos_control_plane_nodes.public_ip_address
-  nodes           = flatten([module.talos_control_plane_nodes.network_interface_private_ip, module.talos_worker_nodes.network_interface_private_ip])
+data "talos_client_configuration" "this" {
+  cluster_name         = var.cluster_name
+  client_configuration = talos_machine_secrets.this.client_configuration
+  endpoints            = module.talos_control_plane_nodes.public_ip_address
+  nodes                = flatten([module.talos_control_plane_nodes.network_interface_private_ip, module.talos_worker_nodes.network_interface_private_ip])
 }
 
 resource "talos_machine_configuration_apply" "controlplane" {
   count = var.num_control_planes
 
-  talos_config          = talos_client_configuration.this.talos_config
-  machine_configuration = talos_machine_configuration_controlplane.this.machine_config
-  endpoint              = module.talos_control_plane_nodes.public_ip_address[count.index]
-  node                  = module.talos_control_plane_nodes.network_interface_private_ip[count.index]
+  client_configuration        = talos_machine_secrets.this.client_configuration
+  machine_configuration_input = data.talos_machine_configuration.controlplane.machine_configuration
+  endpoint                    = module.talos_control_plane_nodes.public_ip_address[count.index]
+  node                        = module.talos_control_plane_nodes.network_interface_private_ip[count.index]
 }
 
 resource "talos_machine_configuration_apply" "worker" {
   count = var.num_workers
 
-  talos_config          = talos_client_configuration.this.talos_config
-  machine_configuration = talos_machine_configuration_worker.this.machine_config
-  endpoint              = module.talos_worker_nodes.public_ip_address[count.index]
-  node                  = module.talos_worker_nodes.network_interface_private_ip[count.index]
+  client_configuration        = talos_machine_secrets.this.client_configuration
+  machine_configuration_input = data.talos_machine_configuration.controlplane.machine_configuration
+  endpoint                    = module.talos_worker_nodes.public_ip_address[count.index]
+  node                        = module.talos_worker_nodes.network_interface_private_ip[count.index]
 }
 
 resource "talos_machine_bootstrap" "this" {
   depends_on = [talos_machine_configuration_apply.controlplane]
 
-  talos_config = talos_client_configuration.this.talos_config
-  endpoint      = module.talos_control_plane_nodes.public_ip_address[0]
-  node          = module.talos_control_plane_nodes.network_interface_private_ip[0]
+  client_configuration = talos_machine_secrets.this.client_configuration
+  endpoint             = module.talos_control_plane_nodes.public_ip_address[0]
+  node                 = module.talos_control_plane_nodes.network_interface_private_ip[0]
 }
 
-resource "talos_cluster_kubeconfig" "this" {
-  talos_config = talos_client_configuration.this.talos_config
-  endpoint      = module.talos_control_plane_nodes.public_ip_address[0]
-  node          = module.talos_control_plane_nodes.network_interface_private_ip[0]
+data "talos_cluster_kubeconfig" "this" {
+  client_configuration = talos_machine_secrets.this.client_configuration
+  endpoint             = module.talos_control_plane_nodes.public_ip_address[0]
+  node                 = module.talos_control_plane_nodes.network_interface_private_ip[0]
+  wait                 = true
 }
