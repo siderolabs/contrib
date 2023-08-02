@@ -57,3 +57,9 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# ignore sensitive terraform outputs
+talosconfig
+kubeconfig
+vars*.json
+patch*.yaml

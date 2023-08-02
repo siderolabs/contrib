@@ -1,0 +1,55 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        ":dependencyDashboard",
+        ":gitSignOff",
+        ":semanticCommitScopeDisabled",
+        "schedule:earlyMondays"
+    ],
+    "prHeader": "Update Request | Renovate Bot",
+    "regexManagers": [
+        {
+            "fileMatch": [
+                "Makefile"
+            ],
+            "matchStrings": [
+                "# renovate: datasource=(?<datasource>.*?)(?:\\s+extractVersion=(?<extractVersion>.+?))?\\s+depName=(?<depName>.+?)\\s.*_VERSION\\s+\\?=\\s+(?<currentValue>.+)"
+            ],
+            "versioningTemplate": "{{#if versioning}}{{versioning}}{{else}}semver{{/if}}"
+        },
+        {
+            "fileMatch": [
+                "Makefile"
+            ],
+            "matchStrings": [
+                "# renovate: depName=(?<depName>.+?)\\s.*_VERSION\\s+:=\\s+(?<currentValue>.+)"
+            ],
+            "datasourceTemplate": "helm",
+            "versioningTemplate": "semver",
+            "registryUrlTemplate": "https://kubernetes.github.io/cloud-provider-aws"
+        }
+    ],
+    "packageRules": [
+        {
+            "matchPackagePatterns": [
+                "*"
+            ],
+            "matchDatasources": [
+                "helm"
+            ],
+            "groupName": "helm charts"
+        },
+        {
+            "matchPackagePatterns": [
+                "*"
+            ],
+            "matchDatasources": [
+                "git-refs",
+                "git-tags",
+                "github-tags",
+                "github-releases"
+            ],
+            "groupName": "releases"
+        }
+    ]
+}

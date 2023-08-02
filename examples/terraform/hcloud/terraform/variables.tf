@@ -11,12 +11,12 @@ variable "cluster_name" {
 
 # Control plane
 variable "controlplane_type" {
-    default = "cpx31"
+  default = "cpx31"
 }
 
 variable "controlplane_ip" {
-    default = "10.0.0.3"
-    type    =  string
+  default = "10.0.0.3"
+  type    = string
 }
 
 # Networking
@@ -38,7 +38,7 @@ variable "network_zone" {
 }
 
 variable "load_balancer_type" {
-    default = "lb11"
+  default = "lb11"
 }
 
 # Workers
@@ -52,6 +52,6 @@ variable "workers" {
 
 variable "worker_extra_volume_size" {
   description = " Size of SSD volume to attach to workers"
-  type = number
-  default = 10
+  type        = number
+  default     = 10
 }

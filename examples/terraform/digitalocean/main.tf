@@ -1,9 +1,9 @@
 ## Upload a custom image to DigitalOcean
 resource "digitalocean_custom_image" "talos_custom_image" {
-  name    = "talos-linux-${var.talos_version}"
-  url     = "https://github.com/siderolabs/talos/releases/download/${var.talos_version}/digital-ocean-amd64.raw.gz"
+  name         = "talos-linux-${var.talos_version}"
+  url          = "https://github.com/siderolabs/talos/releases/download/${var.talos_version}/digital-ocean-amd64.raw.gz"
   distribution = "Unknown OS"
-  regions = ["${var.do_region}"]
+  regions      = ["${var.do_region}"]
 }
 
 ## Cheese the creation of an SSH key
@@ -62,9 +62,9 @@ resource "digitalocean_loadbalancer" "talos_lb" {
 resource "talos_machine_secrets" "machine_secrets" {}
 
 data "talos_client_configuration" "talosconfig" {
-  cluster_name    = var.cluster_name
+  cluster_name         = var.cluster_name
   client_configuration = talos_machine_secrets.machine_secrets.client_configuration
-  endpoints       = digitalocean_droplet.talos_control_plane[*].ipv4_address
+  endpoints            = digitalocean_droplet.talos_control_plane[*].ipv4_address
 }
 
 data "talos_machine_configuration" "machineconfig_cp" {
@@ -76,33 +76,33 @@ data "talos_machine_configuration" "machineconfig_cp" {
 }
 
 resource "talos_machine_configuration_apply" "cp_config_apply" {
-  client_configuration = talos_machine_secrets.machine_secrets.client_configuration
+  client_configuration        = talos_machine_secrets.machine_secrets.client_configuration
   machine_configuration_input = data.talos_machine_configuration.machineconfig_cp.machine_configuration
-  count                 = length(digitalocean_droplet.talos_control_plane)
-  node                  = digitalocean_droplet.talos_control_plane[count.index].ipv4_address
+  count                       = length(digitalocean_droplet.talos_control_plane)
+  node                        = digitalocean_droplet.talos_control_plane[count.index].ipv4_address
 }
 
 data "talos_machine_configuration" "machineconfig_worker" {
   cluster_name     = var.cluster_name
   cluster_endpoint = "https://${digitalocean_loadbalancer.talos_lb.ip}:6443"
-  machine_type = "worker"
+  machine_type     = "worker"
   machine_secrets  = talos_machine_secrets.machine_secrets.machine_secrets
   depends_on       = [digitalocean_loadbalancer.talos_lb]
 }
 
 resource "talos_machine_configuration_apply" "worker_config_apply" {
-  client_configuration = talos_machine_secrets.machine_secrets.client_configuration
+  client_configuration        = talos_machine_secrets.machine_secrets.client_configuration
   machine_configuration_input = data.talos_machine_configuration.machineconfig_worker.machine_configuration
-  count                 = length(digitalocean_droplet.talos_workers)
-  node                  = digitalocean_droplet.talos_workers[count.index].ipv4_address
+  count                       = length(digitalocean_droplet.talos_workers)
+  node                        = digitalocean_droplet.talos_workers[count.index].ipv4_address
 }
 
 resource "talos_machine_bootstrap" "bootstrap" {
   client_configuration = talos_machine_secrets.machine_secrets.client_configuration
-  node         = digitalocean_droplet.talos_control_plane[0].ipv4_address
+  node                 = digitalocean_droplet.talos_control_plane[0].ipv4_address
 }
 
 data "talos_cluster_kubeconfig" "kubeconfig" {
   client_configuration = talos_machine_secrets.machine_secrets.client_configuration
-  node         = digitalocean_droplet.talos_control_plane[0].ipv4_address
+  node                 = digitalocean_droplet.talos_control_plane[0].ipv4_address
 }
