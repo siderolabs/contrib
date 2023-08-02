@@ -1,5 +1,7 @@
 TAG ?= $(shell git describe --tag --always --dirty)
 
+TF_PROJECTS := $(shell find examples/terraform/ -name '.terraform' -prune -o -name 'main.tf' -exec dirname {} \;)
+
 # renovate: datasource=helm depName=aws-cloud-controller-manager
 AWS_CCM_HELM_CHART_VERSION ?= 0.0.7
 # renovate: datasource=github-releases depName=kubernetes/cloud-provider-aws
@@ -10,7 +12,10 @@ fmt:
 	terraform fmt -recursive
 
 .PHONY: generate
-generate: aws-ccm
+generate: aws-ccm tfdocs
+
+tfdocs:
+	$(foreach project,$(TF_PROJECTS),terraform-docs markdown --output-file README.md --output-mode inject $(project);)
 
 .PHONY: check-dirty
 check-dirty: fmt generate ## Verifies that source tree is not dirty

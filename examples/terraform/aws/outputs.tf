@@ -1,9 +1,11 @@
 output "talosconfig" {
-  value     = data.talos_client_configuration.this.talos_config
-  sensitive = true
+  description = "The generated talosconfig."
+  value       = data.talos_client_configuration.this.talos_config
+  sensitive   = true
 }
 
 output "kubeconfig" {
-  value     = data.talos_cluster_kubeconfig.this.kubeconfig_raw
-  sensitive = true
+  description = "The generated kubeconfig."
+  value       = data.talos_cluster_kubeconfig.this.kubeconfig_raw
+  sensitive   = true
 }

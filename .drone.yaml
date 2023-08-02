@@ -1,0 +1,117 @@
+---
+kind: pipeline
+name: default
+type: kubernetes
+
+steps:
+  - name: tf-apply
+    image: autonomy/build-container:latest
+    pull: always
+    environment:
+      ARM_SUBSCRIPTION_ID:
+        from_secret: 'azure_subscription_id'
+      AZURE_STORAGE_ACCOUNT:
+        from_secret: 'az_storage_account'
+      ARM_CLIENT_ID:
+        from_secret: 'az_storage_user'
+      ARM_CLIENT_SECRET:
+        from_secret: 'az_storage_pass'
+      ARM_TENANT_ID:
+        from_secret: 'azure_tenant_id'
+      AWS_ACCESS_KEY_ID:
+        from_secret: 'aws_access_key_id'
+      AWS_SECRET_ACCESS_KEY:
+        from_secret: 'aws_secret_access_key'
+    commands:
+      - apk add --no-cache terraform
+      - mkdir -p _out
+      - cp hack/backend.tf examples/terraform/${TYPE}/backend.tf
+      - az login --service-principal -u "$${ARM_CLIENT_ID}" -p "$${ARM_CLIENT_SECRET}" --tenant "$${ARM_TENANT_ID}"
+      - az storage blob download-batch --overwrite -d _out --pattern "e2e-$${TYPE}-generated/*" -s ${BUCKET_PATH}
+      # copying the downloaded vars
+      - mv _out/e2e-${TYPE}-generated/* examples/terraform/${TYPE}
+      - terraform -chdir=examples/terraform/${TYPE} init -backend-config="resource_group_name=General" -backend-config="storage_account_name=$${AZURE_STORAGE_ACCOUNT}" -backend-config="container_name=${BUCKET_PATH}" -backend-config="key=${TYPE}-terraform.tfstate"
+      # - terraform -chdir=examples/terraform/${TYPE} plan -var-file="vars.json"
+      - terraform -chdir=examples/terraform/${TYPE} apply -auto-approve -var-file="vars.json"
+      - terraform -chdir=examples/terraform/${TYPE} output -raw talosconfig > talosconfig
+      - terraform -chdir=examples/terraform/${TYPE} output -raw kubeconfig > kubeconfig
+      - az storage blob upload --overwrite -f talosconfig -n e2e-${TYPE}-talosconfig -c ${BUCKET_PATH}
+      - az storage blob upload --overwrite -f kubeconfig -n e2e-${TYPE}-kubeconfig -c ${BUCKET_PATH}
+    when:
+      event:
+        - promote
+      target:
+        - e2e-talos-tf-apply
+  - name: tf-destroy
+    image: autonomy/build-container:latest
+    pull: always
+    environment:
+      ARM_SUBSCRIPTION_ID:
+        from_secret: 'azure_subscription_id'
+      AZURE_STORAGE_ACCOUNT:
+        from_secret: 'az_storage_account'
+      ARM_CLIENT_ID:
+        from_secret: 'az_storage_user'
+      ARM_CLIENT_SECRET:
+        from_secret: 'az_storage_pass'
+      ARM_TENANT_ID:
+        from_secret: 'azure_tenant_id'
+      AWS_ACCESS_KEY_ID:
+        from_secret: 'aws_access_key_id'
+      AWS_SECRET_ACCESS_KEY:
+        from_secret: 'aws_secret_access_key'
+    commands:
+      - apk add --no-cache terraform
+      - cp hack/backend.tf examples/terraform/${TYPE}/backend.tf
+      - terraform -chdir=examples/terraform/${TYPE} init -backend-config="resource_group_name=General" -backend-config="storage_account_name=$${AZURE_STORAGE_ACCOUNT}" -backend-config="container_name=${BUCKET_PATH}" -backend-config="key=${TYPE}-terraform.tfstate"
+      # lets remove the talosconfig/kubeconfig data source so destroy is not blocked
+      - terraform -chdir=examples/terraform/${TYPE} state rm data.talos_client_configuration.this data.talos_cluster_kubeconfig.this
+      - terraform -chdir=examples/terraform/${TYPE} apply -destroy -auto-approve
+    when:
+      event:
+        - promote
+      target:
+        - e2e-talos-tf-destroy
+
+trigger:
+  event:
+    exclude:
+      - tag
+      - push
+      - pull_request
+  branch:
+    exclude:
+    - renovate/*
+    - dependabot/*
+
+---
+kind: pipeline
+type: kubernetes
+name: notify
+
+clone:
+  disable: true
+
+steps:
+  - name: slack
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: slack_webhook
+      channel: proj-talos-maintainers
+    when:
+      status:
+        - success
+        - failure
+
+trigger:
+  branch:
+    exclude:
+    - renovate/*
+    - dependabot/*
+  status:
+  - success
+  - failure
+
+depends_on:
+  - default

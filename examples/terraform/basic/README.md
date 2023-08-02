@@ -18,3 +18,49 @@ If different configurations are required, override them through command line wit
 Destroying the cluster should, again, be a simple `terraform destroy`.
 
 Getting the kubeconfig and talosconfig for this cluster can be done with `terraform output -raw kubeconfig > <desired-path-and-filename>` and `terraform output -raw talosconfig > <desired-path-and-filename>`.
+
+<!-- BEGIN_TF_DOCS -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_talos"></a> [talos](#requirement\_talos) | 0.2.0 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_talos"></a> [talos](#provider\_talos) | 0.2.0 |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [talos_machine_bootstrap.this](https://registry.terraform.io/providers/siderolabs/talos/0.2.0/docs/resources/machine_bootstrap) | resource |
+| [talos_machine_configuration_apply.controlplane](https://registry.terraform.io/providers/siderolabs/talos/0.2.0/docs/resources/machine_configuration_apply) | resource |
+| [talos_machine_configuration_apply.worker](https://registry.terraform.io/providers/siderolabs/talos/0.2.0/docs/resources/machine_configuration_apply) | resource |
+| [talos_machine_secrets.this](https://registry.terraform.io/providers/siderolabs/talos/0.2.0/docs/resources/machine_secrets) | resource |
+| [talos_client_configuration.this](https://registry.terraform.io/providers/siderolabs/talos/0.2.0/docs/data-sources/client_configuration) | data source |
+| [talos_cluster_kubeconfig.this](https://registry.terraform.io/providers/siderolabs/talos/0.2.0/docs/data-sources/cluster_kubeconfig) | data source |
+| [talos_machine_configuration.controlplane](https://registry.terraform.io/providers/siderolabs/talos/0.2.0/docs/data-sources/machine_configuration) | data source |
+| [talos_machine_configuration.worker](https://registry.terraform.io/providers/siderolabs/talos/0.2.0/docs/data-sources/machine_configuration) | data source |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_cluster_endpoint"></a> [cluster\_endpoint](#input\_cluster\_endpoint) | The endpoint for the Talos cluster | `string` | n/a | yes |
+| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | A name to provide for the Talos cluster | `string` | n/a | yes |
+| <a name="input_node_data"></a> [node\_data](#input\_node\_data) | A map of node data | <pre>object({<br>    controlplanes = map(object({<br>      install_disk = string<br>      hostname     = optional(string)<br>    }))<br>    workers = map(object({<br>      install_disk = string<br>      hostname     = optional(string)<br>    }))<br>  })</pre> | <pre>{<br>  "controlplanes": {<br>    "10.5.0.2": {<br>      "install_disk": "/dev/sda"<br>    },<br>    "10.5.0.3": {<br>      "install_disk": "/dev/sda"<br>    },<br>    "10.5.0.4": {<br>      "install_disk": "/dev/sda"<br>    }<br>  },<br>  "workers": {<br>    "10.5.0.5": {<br>      "hostname": "worker-1",<br>      "install_disk": "/dev/nvme0n1"<br>    },<br>    "10.5.0.6": {<br>      "hostname": "worker-2",<br>      "install_disk": "/dev/nvme0n1"<br>    }<br>  }<br>}</pre> | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_kubeconfig"></a> [kubeconfig](#output\_kubeconfig) | n/a |
+| <a name="output_talosconfig"></a> [talosconfig](#output\_talosconfig) | n/a |
+<!-- END_TF_DOCS -->

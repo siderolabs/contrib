@@ -13,6 +13,10 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_wrapper: false
+      - name: Setup TF docs
+        uses: jaxxstorm/action-install-gh-release@v1.10.0
+        with:
+          repo: terraform-docs/terraform-docs
       - name: dirty-check
         run: |
           make check-dirty
