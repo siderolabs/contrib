@@ -17,6 +17,10 @@ generate: aws-ccm tfdocs
 tfdocs:
 	$(foreach project,$(TF_PROJECTS),terraform-docs markdown --output-file README.md --output-mode inject $(project);)
 
+upgrade-providers:
+	$(foreach project,$(TF_PROJECTS),terraform -chdir=$(project) init -upgrade;)
+
+
 .PHONY: check-dirty
 check-dirty: fmt generate ## Verifies that source tree is not dirty
 	@if test -n "`git status --porcelain`"; then echo "Source tree is dirty"; git status; exit 1 ; fi
