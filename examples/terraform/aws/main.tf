@@ -318,7 +318,7 @@ module "talos_worker_group" {
   for_each = merge([for info in var.worker_groups : { for index in range(0, info.num_instances) : "${info.name}.${index}" => info }]...)
 
   name                        = "${var.cluster_name}-worker-group-${each.value.name}-${trimprefix(each.key, "${each.value.name}.")}"
-  ami                         = var.ami_id == "" ? data.aws_ami.talos.id : var.ami_id
+  ami                         = each.value.ami_id == null ? (var.ami_id == "" ? data.aws_ami.talos.id : var.ami_id) : each.value.ami_id
   monitoring                  = true
   instance_type               = each.value.instance_type
   subnet_id                   = element(module.vpc.public_subnets, tonumber(trimprefix(each.key, "${each.value.name}.")))

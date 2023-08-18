@@ -55,8 +55,8 @@ variable "worker_groups" {
   type = list(object({
     name               = string
     instance_type      = string
+    ami_id             = optional(string, null)
     num_instances      = optional(number, 1)
-    instance_profile   = optional(string, null)
     kubernetes_version = optional(string, null)
     config_patch_files = optional(list(string), [])
     tags               = optional(map(string), {})
