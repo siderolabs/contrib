@@ -64,8 +64,8 @@ steps:
       - apk add --no-cache terraform
       - cp hack/backend.tf examples/terraform/${TYPE}/backend.tf
       - terraform -chdir=examples/terraform/${TYPE} init -backend-config="resource_group_name=General" -backend-config="storage_account_name=$${AZURE_STORAGE_ACCOUNT}" -backend-config="container_name=${BUCKET_PATH}" -backend-config="key=${TYPE}-terraform.tfstate"
-      # lets remove the talosconfig/kubeconfig data source so destroy is not blocked
-      - terraform -chdir=examples/terraform/${TYPE} state rm data.talos_client_configuration.this data.talos_cluster_kubeconfig.this
+      # lets attempt to remove the talosconfig/kubeconfig data source so destroy is not blocked
+      - terraform -chdir=examples/terraform/${TYPE} state rm data.talos_client_configuration.this data.talos_cluster_kubeconfig.this || true
       - terraform -chdir=examples/terraform/${TYPE} apply -destroy -auto-approve
     when:
       event:

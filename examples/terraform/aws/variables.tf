@@ -4,40 +4,6 @@ variable "cluster_name" {
   default     = "talos-aws-example"
 }
 
-variable "num_control_planes" {
-  description = "Number of control plane nodes to create"
-  type        = number
-  default     = 3
-}
-
-variable "num_workers" {
-  description = "Number of worker nodes to create"
-  type        = number
-  default     = 1
-}
-
-variable "ami_id" {
-  description = "AMI ID to use for talos nodes, if not set the latest talos release ami id will be looked up"
-  type        = string
-  default     = ""
-  validation {
-    condition     = length(var.ami_id) > 0 ? (length(var.ami_id) > 4 && substr(var.ami_id, 0, 4) == "ami-") : true
-    error_message = "The image_id value must be a valid AMI id, starting with \"ami-\"."
-  }
-}
-
-variable "instance_type_control_plane" {
-  description = "Instance type to use for the control plane nodes"
-  type        = string
-  default     = "c5.large"
-}
-
-variable "instance_type_worker" {
-  description = "Instance type to use for the worker nodes"
-  type        = string
-  default     = "c5.large"
-}
-
 variable "ccm" {
   description = "Whether to deploy aws cloud controller manager"
   type        = bool
@@ -50,17 +16,45 @@ variable "kubernetes_version" {
   default     = null
 }
 
+variable "control_plane" {
+  description = "Info for control plane that will be created"
+  type = object({
+    instance_type      = optional(string, "c5.large")
+    ami_id             = optional(string, null)
+    num_instances      = optional(number, 3)
+    config_patch_files = optional(list(string), [])
+    tags               = optional(map(string), {})
+  })
+
+  validation {
+    condition     = var.control_plane.ami_id != null ? (length(var.control_plane.ami_id) > 4 && substr(var.control_plane.ami_id, 0, 4) == "ami-") : true
+    error_message = "The ami_id value must be a valid AMI id, starting with \"ami-\"."
+  }
+
+  default = {}
+}
+
 variable "worker_groups" {
   description = "List of node worker node groups to create"
   type = list(object({
     name               = string
-    instance_type      = string
+    instance_type      = optional(string, "c5.large")
     ami_id             = optional(string, null)
     num_instances      = optional(number, 1)
-    kubernetes_version = optional(string, null)
     config_patch_files = optional(list(string), [])
     tags               = optional(map(string), {})
   }))
+
+  validation {
+    condition = (
+      alltrue([
+        for wg in var.worker_groups : (
+          wg.ami_id != null ? (length(wg.ami_id) > 4 && substr(wg.ami_id, 0, 4) == "ami-") : true
+        )
+      ])
+    )
+    error_message = "The ami_id value must be a valid AMI id, starting with \"ami-\"."
+  }
   default = []
 }
 
@@ -90,18 +84,6 @@ variable "kubernetes_api_allowed_cidr" {
 
 variable "config_patch_files" {
   description = "Path to talos config path files that applies to all nodes"
-  type        = list(string)
-  default     = []
-}
-
-variable "config_patch_files_control_plane" {
-  description = "Path to talos config path files that applies to all control plane nodes"
-  type        = list(string)
-  default     = []
-}
-
-variable "config_patch_files_worker" {
-  description = "Path to talos config path files that applies to all worker nodes"
   type        = list(string)
   default     = []
 }
