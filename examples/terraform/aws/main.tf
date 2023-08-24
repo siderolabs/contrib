@@ -437,6 +437,8 @@ data "talos_client_configuration" "this" {
 }
 
 data "talos_cluster_kubeconfig" "this" {
+  depends_on = [talos_machine_bootstrap.this]
+
   client_configuration = talos_machine_secrets.this.client_configuration
   endpoint             = module.talos_control_plane_nodes.0.public_ip
   node                 = module.talos_control_plane_nodes.0.public_ip
