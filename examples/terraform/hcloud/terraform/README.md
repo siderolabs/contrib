@@ -4,14 +4,14 @@
 | Name | Version |
 |------|---------|
 | <a name="requirement_hcloud"></a> [hcloud](#requirement\_hcloud) | 1.35.2 |
-| <a name="requirement_talos"></a> [talos](#requirement\_talos) | 0.3.1 |
+| <a name="requirement_talos"></a> [talos](#requirement\_talos) | 0.3.2 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_hcloud"></a> [hcloud](#provider\_hcloud) | 1.35.2 |
-| <a name="provider_talos"></a> [talos](#provider\_talos) | 0.3.1 |
+| <a name="provider_talos"></a> [talos](#provider\_talos) | 0.3.2 |
 
 ## Modules
 
@@ -32,12 +32,12 @@ No modules.
 | [hcloud_server.controlplane_server](https://registry.terraform.io/providers/hetznercloud/hcloud/1.35.2/docs/resources/server) | resource |
 | [hcloud_server.worker_server](https://registry.terraform.io/providers/hetznercloud/hcloud/1.35.2/docs/resources/server) | resource |
 | [hcloud_volume.volumes](https://registry.terraform.io/providers/hetznercloud/hcloud/1.35.2/docs/resources/volume) | resource |
-| [talos_machine_bootstrap.bootstrap](https://registry.terraform.io/providers/siderolabs/talos/0.3.1/docs/resources/machine_bootstrap) | resource |
-| [talos_machine_secrets.this](https://registry.terraform.io/providers/siderolabs/talos/0.3.1/docs/resources/machine_secrets) | resource |
-| [talos_client_configuration.this](https://registry.terraform.io/providers/siderolabs/talos/0.3.1/docs/data-sources/client_configuration) | data source |
-| [talos_cluster_kubeconfig.this](https://registry.terraform.io/providers/siderolabs/talos/0.3.1/docs/data-sources/cluster_kubeconfig) | data source |
-| [talos_machine_configuration.controlplane](https://registry.terraform.io/providers/siderolabs/talos/0.3.1/docs/data-sources/machine_configuration) | data source |
-| [talos_machine_configuration.worker](https://registry.terraform.io/providers/siderolabs/talos/0.3.1/docs/data-sources/machine_configuration) | data source |
+| [talos_machine_bootstrap.bootstrap](https://registry.terraform.io/providers/siderolabs/talos/0.3.2/docs/resources/machine_bootstrap) | resource |
+| [talos_machine_secrets.this](https://registry.terraform.io/providers/siderolabs/talos/0.3.2/docs/resources/machine_secrets) | resource |
+| [talos_client_configuration.this](https://registry.terraform.io/providers/siderolabs/talos/0.3.2/docs/data-sources/client_configuration) | data source |
+| [talos_cluster_kubeconfig.this](https://registry.terraform.io/providers/siderolabs/talos/0.3.2/docs/data-sources/cluster_kubeconfig) | data source |
+| [talos_machine_configuration.controlplane](https://registry.terraform.io/providers/siderolabs/talos/0.3.2/docs/data-sources/machine_configuration) | data source |
+| [talos_machine_configuration.worker](https://registry.terraform.io/providers/siderolabs/talos/0.3.2/docs/data-sources/machine_configuration) | data source |
 
 ## Inputs
 

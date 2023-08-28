@@ -55,7 +55,9 @@ variable "worker_groups" {
     )
     error_message = "The ami_id value must be a valid AMI id, starting with \"ami-\"."
   }
-  default = []
+  default = [{
+    name = "default"
+  }]
 }
 
 variable "extra_tags" {
