@@ -371,12 +371,6 @@ data "talos_client_configuration" "this" {
   cluster_name         = var.cluster_name
   client_configuration = talos_machine_secrets.this.client_configuration
   endpoints            = module.talos_control_plane_nodes.*.public_ip
-  nodes = flatten(
-    [
-      module.talos_control_plane_nodes.*.private_ip,
-      [for node in module.talos_worker_group : node.private_ip],
-    ]
-  )
 }
 
 data "talos_cluster_kubeconfig" "this" {
@@ -385,5 +379,13 @@ data "talos_cluster_kubeconfig" "this" {
   client_configuration = talos_machine_secrets.this.client_configuration
   endpoint             = module.talos_control_plane_nodes.0.public_ip
   node                 = module.talos_control_plane_nodes.0.private_ip
-  wait                 = true
+}
+
+data "talos_cluster_health" "this" {
+  depends_on = [data.talos_cluster_kubeconfig.this]
+
+  client_configuration = talos_machine_secrets.this.client_configuration
+  endpoints            = module.talos_control_plane_nodes.*.public_ip
+  control_plane_nodes  = module.talos_control_plane_nodes.*.private_ip
+  worker_nodes         = [for node in module.talos_worker_group : node.private_ip]
 }
