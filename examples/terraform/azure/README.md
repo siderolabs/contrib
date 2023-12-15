@@ -50,7 +50,7 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.71.0 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.85.0 |
 | <a name="provider_talos"></a> [talos](#provider\_talos) | 0.3.2 |
 
 ## Modules

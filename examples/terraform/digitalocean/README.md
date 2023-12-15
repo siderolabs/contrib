@@ -32,7 +32,7 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 |------|---------|
 | <a name="provider_digitalocean"></a> [digitalocean](#provider\_digitalocean) | 2.28.0 |
 | <a name="provider_talos"></a> [talos](#provider\_talos) | 0.3.2 |
-| <a name="provider_tls"></a> [tls](#provider\_tls) | 4.0.4 |
+| <a name="provider_tls"></a> [tls](#provider\_tls) | 4.0.5 |
 
 ## Modules
 
