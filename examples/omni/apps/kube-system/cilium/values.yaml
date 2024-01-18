@@ -1,0 +1,43 @@
+cilium:
+  kubeProxyReplacement: true
+  ipam:
+    mode: kubernetes
+  securityContext:
+    capabilities:
+      ciliumAgent:
+        - CHOWN
+        - KILL
+        - NET_ADMIN
+        - NET_RAW
+        - IPC_LOCK
+        - SYS_ADMIN
+        - SYS_RESOURCE
+        - DAC_OVERRIDE
+        - FOWNER
+        - SETUID
+        - SETGID
+      cleanCiliumState:
+        - NET_ADMIN
+        - SYS_ADMIN
+        - SYS_RESOURCE
+  cgroup:
+    hostRoot: /sys/fs/cgroup
+    autoMount:
+      enabled: false
+  # Enable Cilium Ingress Controller
+  ingressController:
+    enabled: true
+  # Use KubePrism to access cluster API
+  k8sServiceHost: localhost
+  k8sServicePort: 7445
+  # Enable Hubble
+  hubble:
+    relay:
+      enabled: true
+    ui:
+      enabled: true
+      service:
+        annotations:
+          # Enable Omni Workload Proxying for this service
+          omni-kube-service-exposer.sidero.dev/port: "50080"
+          omni-kube-service-exposer.sidero.dev/label: Hubble

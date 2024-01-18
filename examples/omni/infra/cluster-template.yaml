@@ -1,0 +1,27 @@
+kind: Cluster
+name: omni-contrib-demo
+talos:
+  version: v1.6.1
+kubernetes:
+  version: 1.29.0
+features:
+  enableWorkloadProxy: true
+patches:
+  - name: cni
+    file: patches/cni.yaml
+---
+kind: ControlPlane
+machineClass:
+  name: omni-contrib-demo-controlplane
+  size: 3
+patches:
+  - name: cilium
+    file: patches/cilium.yaml
+  - name: argocd
+    file: patches/argocd.yaml
+---
+kind: Workers
+name: workers
+machineClass:
+  name: omni-contrib-demo-workers
+  size: unlimited

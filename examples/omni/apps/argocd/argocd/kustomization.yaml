@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: argocd
+resources:
+  - namespace.yaml
+  - github.com/argoproj/argo-cd/manifests/cluster-install?ref=v2.9.3
+  - bootstrap-app-set.yaml
+
+patches:
+  - path: config.yaml
+  - path: params.yaml
+  - path: service.yaml

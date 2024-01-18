@@ -1,0 +1,64 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: bootstrap
+spec:
+  generators:
+    - matrix:
+        generators:
+          - list:
+              elements:
+                - repoURL: https://github.com/siderolabs/contrib.git
+                  revision: HEAD
+                  repoPath: examples/omni/apps/*/*
+          - git:
+              repoURL: '{{ repoURL }}'
+              revision: '{{ revision }}'
+              directories:
+                - path: '{{ repoPath }}'
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  template:
+    metadata:
+      name: '{{ path[3] }}-{{ path.basenameNormalized }}'
+      namespace: argocd
+    spec:
+      project: default
+      source:
+        repoURL: '{{ repoURL }}'
+        targetRevision: '{{ revision }}'
+        path: '{{ path }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ path[3] }}'
+      syncPolicy:
+        automated:
+          prune: false
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+          - ApplyOutOfSyncOnly=true
+          - RespectIgnoreDifferences=true
+          - SkipDryRunOnMissingResource=true
+      ignoreDifferences:
+        # Cilium generated certs
+        - name: cilium-ca
+          kind: Secret
+          namespace: kube-system
+          jsonPointers:
+            - /data/ca.crt
+            - /data/ca.key
+        - name: hubble-server-certs
+          kind: Secret
+          namespace: kube-system
+          jsonPointers:
+            - /data/ca.crt
+            - /data/tls.crt
+            - /data/tls.key
+        - name: hubble-relay-client-certs
+          kind: Secret
+          namespace: kube-system
+          jsonPointers:
+            - /data/ca.crt
+            - /data/tls.crt
+            - /data/tls.key

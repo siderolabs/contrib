@@ -1,0 +1,7 @@
+apiVersion: v2
+name: rook-ceph
+version: v1.13.2
+dependencies:
+  - name: rook-ceph
+    version: v1.13.2
+    repository: https://charts.rook.io/release
