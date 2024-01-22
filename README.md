@@ -16,3 +16,7 @@ The examples provided are maintained on a best effort basic and please file issu
 - [vultr](./examples/terraform/vultr)
 - [AWS](./examples/terraform/aws)
 - [Azure](./examples/terraform/azure)
+
+## Omni Example
+
+- [Omni](./examples/omni)

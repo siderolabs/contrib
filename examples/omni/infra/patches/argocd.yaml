@@ -22325,6 +22325,12 @@ cluster:
               syncPolicy:
                 automated:
                   prune: false
+                retry:
+                  backoff:
+                    duration: 30s
+                    factor: 2
+                    maxDuration: 5m
+                  limit: -1
                 syncOptions:
                 - CreateNamespace=true
                 - ServerSideApply=true

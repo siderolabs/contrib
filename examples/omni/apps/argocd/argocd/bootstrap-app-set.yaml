@@ -40,6 +40,12 @@ spec:
           - ApplyOutOfSyncOnly=true
           - RespectIgnoreDifferences=true
           - SkipDryRunOnMissingResource=true
+        retry:
+          limit: -1 # Infinite retries
+          backoff:
+            duration: 30s
+            factor: 2
+            maxDuration: 5m
       ignoreDifferences:
         # Cilium generated certs
         - name: cilium-ca
