@@ -267,7 +267,7 @@ module "talos_control_plane_nodes" {
   iam_role_policies = var.ccm ? {
     "${var.cluster_name}-control-plane-ccm-policy" : aws_iam_policy.control_plane_ccm_policy[0].arn,
   } : {}
-  tags = merge(var.extra_tags, local.cluster_required_tags)
+  tags = merge(var.extra_tags, var.control_plane.tags, local.cluster_required_tags)
 
   vpc_security_group_ids = [module.cluster_sg.security_group_id]
 
