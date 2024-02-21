@@ -23,7 +23,6 @@ steps:
       AWS_SECRET_ACCESS_KEY:
         from_secret: 'aws_secret_access_key'
     commands:
-      - apk add --no-cache terraform
       - mkdir -p _out
       - cp hack/backend.tf examples/terraform/${TYPE}/backend.tf
       - az login --service-principal -u "$${ARM_CLIENT_ID}" -p "$${ARM_CLIENT_SECRET}" --tenant "$${ARM_TENANT_ID}"
@@ -61,7 +60,6 @@ steps:
       AWS_SECRET_ACCESS_KEY:
         from_secret: 'aws_secret_access_key'
     commands:
-      - apk add --no-cache terraform
       - cp hack/backend.tf examples/terraform/${TYPE}/backend.tf
       - terraform -chdir=examples/terraform/${TYPE} init -backend-config="resource_group_name=General" -backend-config="storage_account_name=$${AZURE_STORAGE_ACCOUNT}" -backend-config="container_name=${BUCKET_PATH}" -backend-config="key=${TYPE}-terraform.tfstate"
       # lets attempt to remove the talosconfig/kubeconfig data source so destroy is not blocked
