@@ -312,6 +312,7 @@ data "talos_machine_configuration" "controlplane" {
   cluster_endpoint   = "https://${module.elb_k8s_elb.elb_dns_name}"
   machine_type       = "controlplane"
   machine_secrets    = talos_machine_secrets.this.machine_secrets
+  talos_version      = var.talos_version_contract
   kubernetes_version = var.kubernetes_version
   docs               = false
   examples           = false
@@ -330,6 +331,7 @@ data "talos_machine_configuration" "worker_group" {
   cluster_endpoint   = "https://${module.elb_k8s_elb.elb_dns_name}"
   machine_type       = "worker"
   machine_secrets    = talos_machine_secrets.this.machine_secrets
+  talos_version      = var.talos_version_contract
   kubernetes_version = var.kubernetes_version
   docs               = false
   examples           = false

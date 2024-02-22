@@ -10,6 +10,12 @@ variable "ccm" {
   default     = false
 }
 
+variable "talos_version_contract" {
+  description = "Talos API version to use for the cluster, if not set the the version shipped with the talos sdk version will be used"
+  type        = string
+  default     = null
+}
+
 variable "kubernetes_version" {
   description = "Kubernetes version to use for the cluster, if not set the k8s version shipped with the talos sdk version will be used"
   type        = string
