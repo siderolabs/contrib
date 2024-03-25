@@ -325,7 +325,7 @@ data "talos_machine_configuration" "controlplane" {
 }
 
 data "talos_machine_configuration" "worker_group" {
-  for_each = merge([for info in var.worker_groups : { for index in range(0, info.num_instances) : "${info.name}.${index}" => info }]...)
+  for_each = merge([for info in var.worker_groups : { "${info.name}" = info }]...)
 
   cluster_name       = var.cluster_name
   cluster_endpoint   = "https://${module.elb_k8s_elb.elb_dns_name}"
@@ -353,10 +353,19 @@ resource "talos_machine_configuration_apply" "controlplane" {
 }
 
 resource "talos_machine_configuration_apply" "worker_group" {
-  for_each = merge([for info in var.worker_groups : { for index in range(0, info.num_instances) : "${info.name}.${index}" => info }]...)
+  for_each = merge([
+    for info in var.worker_groups : {
+      for index in range(0, info.num_instances) :
+      "${info.name}.${index}" => {
+        name       = info.name,
+        public_ip  = module.talos_worker_group["${info.name}.${index}"].public_ip,
+        private_ip = module.talos_worker_group["${info.name}.${index}"].private_ip
+      }
+    }
+  ]...)
 
   client_configuration        = talos_machine_secrets.this.client_configuration
-  machine_configuration_input = data.talos_machine_configuration.worker_group[each.key].machine_configuration
+  machine_configuration_input = data.talos_machine_configuration.worker_group[each.value.name].machine_configuration
   endpoint                    = module.talos_worker_group[each.key].public_ip
   node                        = module.talos_worker_group[each.key].private_ip
 }
@@ -384,7 +393,11 @@ data "talos_cluster_kubeconfig" "this" {
 }
 
 data "talos_cluster_health" "this" {
-  depends_on = [data.talos_cluster_kubeconfig.this]
+  depends_on = [
+    talos_machine_configuration_apply.controlplane,
+    talos_machine_configuration_apply.worker_group,
+    data.talos_cluster_kubeconfig.this
+  ]
 
   client_configuration = talos_machine_secrets.this.client_configuration
   endpoints            = module.talos_control_plane_nodes.*.public_ip
