@@ -4,11 +4,11 @@ terraform {
   required_providers {
     equinix = {
       source  = "equinix/equinix"
-      version = "1.11.1"
+      version = "1.33.0"
     }
     talos = {
       source  = "siderolabs/talos"
-      version = "0.3.2"
+      version = "0.4.0"
     }
   }
 }
