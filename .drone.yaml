@@ -60,11 +60,16 @@ steps:
       AWS_SECRET_ACCESS_KEY:
         from_secret: 'aws_secret_access_key'
     commands:
+      - mkdir -p _out
       - cp hack/backend.tf examples/terraform/${TYPE}/backend.tf
+      - az login --service-principal -u "$${ARM_CLIENT_ID}" -p "$${ARM_CLIENT_SECRET}" --tenant "$${ARM_TENANT_ID}"
+      - az storage blob download-batch --overwrite -d _out --pattern "e2e-$${TYPE}-generated/*" -s ${BUCKET_PATH}
+      # copying the downloaded vars
+      - mv _out/e2e-${TYPE}-generated/* examples/terraform/${TYPE}
       - terraform -chdir=examples/terraform/${TYPE} init -backend-config="resource_group_name=General" -backend-config="storage_account_name=$${AZURE_STORAGE_ACCOUNT}" -backend-config="container_name=${BUCKET_PATH}" -backend-config="key=${TYPE}-terraform.tfstate"
       # lets attempt to remove the talosconfig/kubeconfig data source so destroy is not blocked
-      - terraform -chdir=examples/terraform/${TYPE} state rm data.talos_client_configuration.this data.talos_cluster_kubeconfig.this || true
-      - terraform -chdir=examples/terraform/${TYPE} apply -destroy -auto-approve
+      - terraform -chdir=examples/terraform/${TYPE} state rm data.talos_client_configuration.this data.talos_cluster_kubeconfig.this data.talos_cluster_health.this || true
+      - terraform -chdir=examples/terraform/${TYPE} apply -destroy -auto-approve -var-file="vars.json" -refresh="$${REFRESH_ON_DESTROY:-true}"
     when:
       event:
         - promote
