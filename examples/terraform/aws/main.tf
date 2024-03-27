@@ -382,6 +382,7 @@ data "talos_client_configuration" "this" {
   cluster_name         = var.cluster_name
   client_configuration = talos_machine_secrets.this.client_configuration
   endpoints            = module.talos_control_plane_nodes.*.public_ip
+  nodes                = flatten([module.talos_control_plane_nodes.*.public_ip, flatten([for node in module.talos_worker_group : node.private_ip])])
 }
 
 data "talos_cluster_kubeconfig" "this" {
