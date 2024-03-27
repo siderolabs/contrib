@@ -1,4 +1,4 @@
-# Advacned Terraform Example
+# Advanced Terraform Example
 
 This example will create a local Talos cluster using libvirt.
 
