@@ -3,6 +3,7 @@ resource "equinix_metal_reserved_ip_block" "talos_control_plane_vip" {
   project_id  = var.em_project_id
   type        = "public_ipv4"
   metro       = var.em_region
+  tags        = var.extra_tags
   quantity    = 1
   description = "${var.cluster_name} Control Plane VIP"
 }
