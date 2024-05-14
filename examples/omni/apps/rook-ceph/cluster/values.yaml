@@ -1,0 +1,12 @@
+rook-ceph-cluster:
+  cephClusterSpec:
+    dashboard:
+      enabled: true
+      port: 8443
+      ssl: false
+
+    annotations:
+      dashboard:
+        # Enable Omni Workload Proxying for this service
+        omni-kube-service-exposer.sidero.dev/port: "8443"
+        omni-kube-service-exposer.sidero.dev/label: Ceph Dashboard
