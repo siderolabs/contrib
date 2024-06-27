@@ -110,7 +110,7 @@ module "elb_k8s_elb" {
   source  = "terraform-aws-modules/elb/aws"
   version = "~> 4.0"
 
-  name    = "${var.cluster_name}-k8s-api"
+  name    = substr("${var.cluster_name}-k8s-api", 0, 32)
   subnets = module.vpc.public_subnets
   tags    = merge(var.extra_tags, local.cluster_required_tags)
   security_groups = [
