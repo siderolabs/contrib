@@ -84,7 +84,7 @@ resource "talos_machine_bootstrap" "this" {
   node                 = vultr_instance.talos_control_plane[0].main_ip
 }
 
-data "talos_cluster_kubeconfig" "this" {
+resource "talos_cluster_kubeconfig" "this" {
   client_configuration = talos_machine_secrets.this.client_configuration
   node                 = vultr_instance.talos_control_plane[0].main_ip
 }

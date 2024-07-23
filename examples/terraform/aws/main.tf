@@ -385,7 +385,7 @@ data "talos_client_configuration" "this" {
   nodes                = flatten([module.talos_control_plane_nodes.*.public_ip, flatten([for node in module.talos_worker_group : node.private_ip])])
 }
 
-data "talos_cluster_kubeconfig" "this" {
+resource "talos_cluster_kubeconfig" "this" {
   depends_on = [talos_machine_bootstrap.this]
 
   client_configuration = talos_machine_secrets.this.client_configuration
@@ -397,7 +397,7 @@ data "talos_cluster_health" "this" {
   depends_on = [
     talos_machine_configuration_apply.controlplane,
     talos_machine_configuration_apply.worker_group,
-    data.talos_cluster_kubeconfig.this
+    talos_cluster_kubeconfig.this
   ]
 
   client_configuration = talos_machine_secrets.this.client_configuration

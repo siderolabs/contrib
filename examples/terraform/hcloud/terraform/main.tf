@@ -161,7 +161,7 @@ resource "hcloud_volume" "volumes" {
 }
 
 # kubeconfig
-data "talos_cluster_kubeconfig" "this" {
+resource "talos_cluster_kubeconfig" "this" {
   client_configuration = talos_machine_secrets.this.client_configuration
   node                 = hcloud_server.controlplane_server.ipv4_address
   wait                 = true

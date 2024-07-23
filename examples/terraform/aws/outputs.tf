@@ -6,6 +6,6 @@ output "talosconfig" {
 
 output "kubeconfig" {
   description = "The generated kubeconfig."
-  value       = data.talos_cluster_kubeconfig.this.kubeconfig_raw
+  value       = talos_cluster_kubeconfig.this.kubeconfig_raw
   sensitive   = true
 }
