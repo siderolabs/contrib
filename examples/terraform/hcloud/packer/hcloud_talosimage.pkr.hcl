@@ -11,7 +11,7 @@ packer {
 
 variable "talos_version" {
   type    = string
-  default = "v1.3.0"
+  default = "v1.6.0"
 }
 
 locals {
@@ -20,9 +20,9 @@ locals {
 
 source "hcloud" "talos" {
   rescue       = "linux64"
-  image        = "debian-11"
+  image        = "debian-12"
   location     = "fsn1"
-  server_type  = "cx11"
+  server_type  = "cx22"
   ssh_username = "root"
 
   snapshot_name = "talos system disk ${var.talos_version}"
