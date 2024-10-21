@@ -27,7 +27,7 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 |------|---------|
 | <a name="requirement_libvirt"></a> [libvirt](#requirement\_libvirt) | 0.7.1 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | 3.5.1 |
-| <a name="requirement_talos"></a> [talos](#requirement\_talos) | 0.6.0-beta.0 |
+| <a name="requirement_talos"></a> [talos](#requirement\_talos) | 0.7.0-alpha.0 |
 | <a name="requirement_tls"></a> [tls](#requirement\_tls) | 4.0.4 |
 
 ## Providers
@@ -36,7 +36,7 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 |------|---------|
 | <a name="provider_libvirt"></a> [libvirt](#provider\_libvirt) | 0.7.1 |
 | <a name="provider_random"></a> [random](#provider\_random) | 3.5.1 |
-| <a name="provider_talos"></a> [talos](#provider\_talos) | 0.6.0-beta.0 |
+| <a name="provider_talos"></a> [talos](#provider\_talos) | 0.7.0-alpha.0 |
 | <a name="provider_tls"></a> [tls](#provider\_tls) | 4.0.4 |
 
 ## Modules
@@ -55,8 +55,8 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 | [random_id.cluster_id](https://registry.terraform.io/providers/hashicorp/random/3.5.1/docs/resources/id) | resource |
 | [random_id.cluster_secret](https://registry.terraform.io/providers/hashicorp/random/3.5.1/docs/resources/id) | resource |
 | [random_id.secretbox_encryption_secret](https://registry.terraform.io/providers/hashicorp/random/3.5.1/docs/resources/id) | resource |
-| [talos_machine_bootstrap.this](https://registry.terraform.io/providers/siderolabs/talos/0.6.0-beta.0/docs/resources/machine_bootstrap) | resource |
-| [talos_machine_configuration_apply.this](https://registry.terraform.io/providers/siderolabs/talos/0.6.0-beta.0/docs/resources/machine_configuration_apply) | resource |
+| [talos_machine_bootstrap.this](https://registry.terraform.io/providers/siderolabs/talos/0.7.0-alpha.0/docs/resources/machine_bootstrap) | resource |
+| [talos_machine_configuration_apply.this](https://registry.terraform.io/providers/siderolabs/talos/0.7.0-alpha.0/docs/resources/machine_configuration_apply) | resource |
 | [tls_cert_request.client_csr](https://registry.terraform.io/providers/hashicorp/tls/4.0.4/docs/resources/cert_request) | resource |
 | [tls_cert_request.k8s_client_csr](https://registry.terraform.io/providers/hashicorp/tls/4.0.4/docs/resources/cert_request) | resource |
 | [tls_locally_signed_cert.client_cert](https://registry.terraform.io/providers/hashicorp/tls/4.0.4/docs/resources/locally_signed_cert) | resource |
@@ -72,8 +72,8 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 | [tls_self_signed_cert.k8s_aggregator_cert](https://registry.terraform.io/providers/hashicorp/tls/4.0.4/docs/resources/self_signed_cert) | resource |
 | [tls_self_signed_cert.k8s_cert](https://registry.terraform.io/providers/hashicorp/tls/4.0.4/docs/resources/self_signed_cert) | resource |
 | [tls_self_signed_cert.os_cert](https://registry.terraform.io/providers/hashicorp/tls/4.0.4/docs/resources/self_signed_cert) | resource |
-| [talos_client_configuration.this](https://registry.terraform.io/providers/siderolabs/talos/0.6.0-beta.0/docs/data-sources/client_configuration) | data source |
-| [talos_machine_configuration.this](https://registry.terraform.io/providers/siderolabs/talos/0.6.0-beta.0/docs/data-sources/machine_configuration) | data source |
+| [talos_client_configuration.this](https://registry.terraform.io/providers/siderolabs/talos/0.7.0-alpha.0/docs/data-sources/client_configuration) | data source |
+| [talos_machine_configuration.this](https://registry.terraform.io/providers/siderolabs/talos/0.7.0-alpha.0/docs/data-sources/machine_configuration) | data source |
 
 ## Inputs
 
