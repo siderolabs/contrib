@@ -42,7 +42,7 @@ services:
       - ${EXTERNAL_IP:-127.0.0.1}:6000:6000
     command: >
       -http-port=:6000
-      -external-url=${IMGFAC_EXTERNAL_URL?}
+      -external-url=http://${IMGFAC_EXTERNAL_URL?}
       -external-pxe-url=http://${IMGFAC_EXTERNAL_URL?}
       -cache-signing-key-path=/keys/cache-signing-key.key
       -cache-repository=registry:5000/cache
