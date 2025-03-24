@@ -3,9 +3,9 @@ TAG ?= $(shell git describe --tag --always --dirty)
 TF_PROJECTS := $(shell find examples/terraform/ -name '.terraform' -prune -o -name 'main.tf' -exec dirname {} \;)
 
 # renovate: datasource=helm depName=aws-cloud-controller-manager
-AWS_CCM_HELM_CHART_VERSION ?= 0.0.7
+AWS_CCM_HELM_CHART_VERSION ?= 0.0.8
 # renovate: datasource=github-releases depName=kubernetes/cloud-provider-aws
-AWS_CCM_VERSION ?= v1.27.1
+AWS_CCM_VERSION ?= v1.32.1
 
 .PHONY: fmt
 fmt:
