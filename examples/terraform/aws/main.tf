@@ -178,6 +178,7 @@ resource "aws_iam_policy" "control_plane_ccm_policy" {
             "ec2:DetachVolume",
             "ec2:RevokeSecurityGroupIngress",
             "ec2:DescribeVpcs",
+            "ec2:DescribeInstanceTopology",
             "elasticloadbalancing:AddTags",
             "elasticloadbalancing:AttachLoadBalancerToSubnets",
             "elasticloadbalancing:ApplySecurityGroupsToLoadBalancer",
