@@ -11,14 +11,14 @@ It deploys a Talos Kubernetes cluster using Omni, with the following tooling:
 ## Prereqs
 
 An [Omni account](https://signup.siderolabs.io/), and some machines registered to it.
-How the machines are started and joined to the Omni instance are not covered in this README, but [documentation is available](https://omni.siderolabs.com/docs/tutorials/getting_started/).
+How the machines are started and joined to the Omni instance are not covered in this README, but [documentation is available](https://omni.siderolabs.com/tutorials/getting_started/).
 With the default configuration, a minimum of 6 machines, 3 of which with additional block devices for persistent storage.
 
-This example uses [Machine Classes](https://omni.siderolabs.com/docs/how-to-guides/how-to-create-machine-classes/) called `omni-contrib-controlplane` and `omni-contrib-workers`.
+This example uses [Machine Classes](https://omni.siderolabs.com/how-to-guides/create-a-machine-class) called `omni-contrib-controlplane` and `omni-contrib-workers`.
 How they are defined is entirely dependent on the infrastructure available, they would need to be configured on the Omni instance.
 
 Lastly, `omnictl` the Omni CLI tool would also be needed.
-See the [How-to](https://omni.siderolabs.com/docs/how-to-guides/how-to-install-and-configure-omnictl/) on how to obtain and configure it.
+See the [How-to](https://omni.siderolabs.com/how-to-guides/install-and-configure-omnictl) on how to obtain and configure it.
 
 ## Usage
 
@@ -30,7 +30,7 @@ omnictl cluster template sync --file cluster-template.yaml
 
 Omni will then being to allocate your machines, install Talos, and configure and bootstrap the cluster.
 
-This setup makes use of the [Omni Workload Proxy](https://omni.siderolabs.com/docs/how-to-guides/how-to-expose-http-service-from-a-cluster) feature,
+This setup makes use of the [Omni Workload Proxy](https://omni.siderolabs.com/how-to-guides/expose-an-http-service-from-a-cluster) feature,
 which allows access to the HTTP front end services *without* the need of a separate external Ingress Controller or LoadBalancer.
 Additionally, it leverages Omni's built-in authentication to protect the services, even those services that don't support authentication themselves.
 
