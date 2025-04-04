@@ -270,6 +270,10 @@ module "talos_control_plane_nodes" {
   } : {}
   tags = merge(var.extra_tags, var.control_plane.tags, local.cluster_required_tags)
 
+  metadata_options = {
+    "instance_metadata_tags" : "enabled"
+  }
+
   vpc_security_group_ids = [module.cluster_sg.security_group_id]
 
   root_block_device = [
@@ -296,6 +300,10 @@ module "talos_worker_group" {
     "${var.cluster_name}-worker-ccm-policy" : aws_iam_policy.worker_ccm_policy[0].arn,
   } : {}
   tags = merge(each.value.tags, var.extra_tags, local.cluster_required_tags)
+
+  metadata_options = {
+    "instance_metadata_tags" : "enabled"
+  }
 
   vpc_security_group_ids = [module.cluster_sg.security_group_id]
 
