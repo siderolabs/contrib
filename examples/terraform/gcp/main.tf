@@ -144,6 +144,11 @@ resource "google_compute_instance" "cp" {
       network_tier = "PREMIUM"
     }
   }
+
+  shielded_instance_config {
+    enable_vtpm                 = true
+    enable_integrity_monitoring = true
+  }
 }
 
 resource "google_compute_instance" "workers" {
@@ -162,6 +167,11 @@ resource "google_compute_instance" "workers" {
     access_config {
       network_tier = "PREMIUM"
     }
+  }
+
+  shielded_instance_config {
+    enable_vtpm                 = true
+    enable_integrity_monitoring = true
   }
 }
 

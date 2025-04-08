@@ -4,14 +4,14 @@
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.3 |
-| <a name="requirement_google"></a> [google](#requirement\_google) | ~> 5.0 |
+| <a name="requirement_google"></a> [google](#requirement\_google) | ~> 6.0 |
 | <a name="requirement_talos"></a> [talos](#requirement\_talos) | 0.7.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_google"></a> [google](#provider\_google) | 5.45.0 |
+| <a name="provider_google"></a> [google](#provider\_google) | 6.28.0 |
 | <a name="provider_talos"></a> [talos](#provider\_talos) | 0.7.0 |
 
 ## Modules
