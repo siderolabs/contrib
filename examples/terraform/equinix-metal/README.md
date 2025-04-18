@@ -32,14 +32,14 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 | Name | Version |
 |------|---------|
 | <a name="requirement_equinix"></a> [equinix](#requirement\_equinix) | 1.33.0 |
-| <a name="requirement_talos"></a> [talos](#requirement\_talos) | 0.7.0 |
+| <a name="requirement_talos"></a> [talos](#requirement\_talos) | 0.8.0-alpha.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_equinix"></a> [equinix](#provider\_equinix) | 1.33.0 |
-| <a name="provider_talos"></a> [talos](#provider\_talos) | 0.7.0 |
+| <a name="provider_talos"></a> [talos](#provider\_talos) | 0.8.0-alpha.0 |
 
 ## Modules
 
@@ -52,15 +52,15 @@ No modules.
 | [equinix_metal_device.talos_control_plane_nodes](https://registry.terraform.io/providers/equinix/equinix/1.33.0/docs/resources/metal_device) | resource |
 | [equinix_metal_device.talos_worker_group](https://registry.terraform.io/providers/equinix/equinix/1.33.0/docs/resources/metal_device) | resource |
 | [equinix_metal_reserved_ip_block.talos_control_plane_vip](https://registry.terraform.io/providers/equinix/equinix/1.33.0/docs/resources/metal_reserved_ip_block) | resource |
-| [talos_cluster_kubeconfig.this](https://registry.terraform.io/providers/siderolabs/talos/0.7.0/docs/resources/cluster_kubeconfig) | resource |
-| [talos_machine_bootstrap.this](https://registry.terraform.io/providers/siderolabs/talos/0.7.0/docs/resources/machine_bootstrap) | resource |
-| [talos_machine_configuration_apply.controlplane](https://registry.terraform.io/providers/siderolabs/talos/0.7.0/docs/resources/machine_configuration_apply) | resource |
-| [talos_machine_configuration_apply.worker_group](https://registry.terraform.io/providers/siderolabs/talos/0.7.0/docs/resources/machine_configuration_apply) | resource |
-| [talos_machine_secrets.this](https://registry.terraform.io/providers/siderolabs/talos/0.7.0/docs/resources/machine_secrets) | resource |
-| [talos_client_configuration.this](https://registry.terraform.io/providers/siderolabs/talos/0.7.0/docs/data-sources/client_configuration) | data source |
-| [talos_cluster_health.this](https://registry.terraform.io/providers/siderolabs/talos/0.7.0/docs/data-sources/cluster_health) | data source |
-| [talos_machine_configuration.controlplane](https://registry.terraform.io/providers/siderolabs/talos/0.7.0/docs/data-sources/machine_configuration) | data source |
-| [talos_machine_configuration.worker_group](https://registry.terraform.io/providers/siderolabs/talos/0.7.0/docs/data-sources/machine_configuration) | data source |
+| [talos_cluster_kubeconfig.this](https://registry.terraform.io/providers/siderolabs/talos/0.8.0-alpha.0/docs/resources/cluster_kubeconfig) | resource |
+| [talos_machine_bootstrap.this](https://registry.terraform.io/providers/siderolabs/talos/0.8.0-alpha.0/docs/resources/machine_bootstrap) | resource |
+| [talos_machine_configuration_apply.controlplane](https://registry.terraform.io/providers/siderolabs/talos/0.8.0-alpha.0/docs/resources/machine_configuration_apply) | resource |
+| [talos_machine_configuration_apply.worker_group](https://registry.terraform.io/providers/siderolabs/talos/0.8.0-alpha.0/docs/resources/machine_configuration_apply) | resource |
+| [talos_machine_secrets.this](https://registry.terraform.io/providers/siderolabs/talos/0.8.0-alpha.0/docs/resources/machine_secrets) | resource |
+| [talos_client_configuration.this](https://registry.terraform.io/providers/siderolabs/talos/0.8.0-alpha.0/docs/data-sources/client_configuration) | data source |
+| [talos_cluster_health.this](https://registry.terraform.io/providers/siderolabs/talos/0.8.0-alpha.0/docs/data-sources/cluster_health) | data source |
+| [talos_machine_configuration.controlplane](https://registry.terraform.io/providers/siderolabs/talos/0.8.0-alpha.0/docs/data-sources/machine_configuration) | data source |
+| [talos_machine_configuration.worker_group](https://registry.terraform.io/providers/siderolabs/talos/0.8.0-alpha.0/docs/data-sources/machine_configuration) | data source |
 
 ## Inputs
 

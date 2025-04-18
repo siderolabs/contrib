@@ -24,14 +24,14 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 | Name | Version |
 |------|---------|
 | <a name="requirement_digitalocean"></a> [digitalocean](#requirement\_digitalocean) | 2.28.0 |
-| <a name="requirement_talos"></a> [talos](#requirement\_talos) | 0.7.0 |
+| <a name="requirement_talos"></a> [talos](#requirement\_talos) | 0.8.0-alpha.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_digitalocean"></a> [digitalocean](#provider\_digitalocean) | 2.28.0 |
-| <a name="provider_talos"></a> [talos](#provider\_talos) | 0.7.0 |
+| <a name="provider_talos"></a> [talos](#provider\_talos) | 0.8.0-alpha.0 |
 | <a name="provider_tls"></a> [tls](#provider\_tls) | 4.0.6 |
 
 ## Modules
@@ -47,15 +47,15 @@ No modules.
 | [digitalocean_droplet.talos_workers](https://registry.terraform.io/providers/digitalocean/digitalocean/2.28.0/docs/resources/droplet) | resource |
 | [digitalocean_loadbalancer.talos_lb](https://registry.terraform.io/providers/digitalocean/digitalocean/2.28.0/docs/resources/loadbalancer) | resource |
 | [digitalocean_ssh_key.fake_ssh_key](https://registry.terraform.io/providers/digitalocean/digitalocean/2.28.0/docs/resources/ssh_key) | resource |
-| [talos_machine_bootstrap.bootstrap](https://registry.terraform.io/providers/siderolabs/talos/0.7.0/docs/resources/machine_bootstrap) | resource |
-| [talos_machine_configuration_apply.cp_config_apply](https://registry.terraform.io/providers/siderolabs/talos/0.7.0/docs/resources/machine_configuration_apply) | resource |
-| [talos_machine_configuration_apply.worker_config_apply](https://registry.terraform.io/providers/siderolabs/talos/0.7.0/docs/resources/machine_configuration_apply) | resource |
-| [talos_machine_secrets.machine_secrets](https://registry.terraform.io/providers/siderolabs/talos/0.7.0/docs/resources/machine_secrets) | resource |
+| [talos_machine_bootstrap.bootstrap](https://registry.terraform.io/providers/siderolabs/talos/0.8.0-alpha.0/docs/resources/machine_bootstrap) | resource |
+| [talos_machine_configuration_apply.cp_config_apply](https://registry.terraform.io/providers/siderolabs/talos/0.8.0-alpha.0/docs/resources/machine_configuration_apply) | resource |
+| [talos_machine_configuration_apply.worker_config_apply](https://registry.terraform.io/providers/siderolabs/talos/0.8.0-alpha.0/docs/resources/machine_configuration_apply) | resource |
+| [talos_machine_secrets.machine_secrets](https://registry.terraform.io/providers/siderolabs/talos/0.8.0-alpha.0/docs/resources/machine_secrets) | resource |
 | [tls_private_key.fake_ssh_key](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
-| [talos_client_configuration.talosconfig](https://registry.terraform.io/providers/siderolabs/talos/0.7.0/docs/data-sources/client_configuration) | data source |
-| [talos_cluster_kubeconfig.kubeconfig](https://registry.terraform.io/providers/siderolabs/talos/0.7.0/docs/data-sources/cluster_kubeconfig) | data source |
-| [talos_machine_configuration.machineconfig_cp](https://registry.terraform.io/providers/siderolabs/talos/0.7.0/docs/data-sources/machine_configuration) | data source |
-| [talos_machine_configuration.machineconfig_worker](https://registry.terraform.io/providers/siderolabs/talos/0.7.0/docs/data-sources/machine_configuration) | data source |
+| [talos_client_configuration.talosconfig](https://registry.terraform.io/providers/siderolabs/talos/0.8.0-alpha.0/docs/data-sources/client_configuration) | data source |
+| [talos_cluster_kubeconfig.kubeconfig](https://registry.terraform.io/providers/siderolabs/talos/0.8.0-alpha.0/docs/data-sources/cluster_kubeconfig) | data source |
+| [talos_machine_configuration.machineconfig_cp](https://registry.terraform.io/providers/siderolabs/talos/0.8.0-alpha.0/docs/data-sources/machine_configuration) | data source |
+| [talos_machine_configuration.machineconfig_worker](https://registry.terraform.io/providers/siderolabs/talos/0.8.0-alpha.0/docs/data-sources/machine_configuration) | data source |
 
 ## Inputs
 
