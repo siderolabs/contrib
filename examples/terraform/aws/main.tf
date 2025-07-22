@@ -3,7 +3,7 @@ locals {
   # Keep first 16 chars as-is, use SHA256 hash of remaining chars for last 16
   # also trim trailing dashes
   # This is to ensure compatibility with AWS resource naming restrictions
-  cluster_name_safe = length(var.cluster_name) <= 32 ? var.cluster_name : "${trimright(substr(var.cluster_name, 0, 16), "-")}${substr(sha256(substr(var.cluster_name, 16, -1)), 0, 16)}"
+  cluster_name_safe = length(var.cluster_name) <= 32 ? var.cluster_name : "${trimsuffix(substr(var.cluster_name, 0, 16), "-")}${substr(sha256(substr(var.cluster_name, 16, -1)), 0, 16)}"
 
   common_machine_config_patch = {
     machine = {
@@ -119,7 +119,7 @@ module "elb_k8s_elb" {
   source  = "terraform-aws-modules/elb/aws"
   version = "~> 4.0"
 
-  name    = substr("${local.cluster_name_safe}-k8s-api", 0, 32)
+  name    = trimsuffix(substr("${local.cluster_name_safe}-k8s-api", 0, 32), "-")
   subnets = module.vpc.public_subnets
   tags    = merge(var.extra_tags, local.cluster_required_tags)
   security_groups = [
