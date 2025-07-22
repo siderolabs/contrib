@@ -1,4 +1,10 @@
 locals {
+  # Generate a safe cluster name limited to 32 characters
+  # Keep first 16 chars as-is, use SHA256 hash of remaining chars for last 16
+  # also trim trailing dashes
+  # This is to ensure compatibility with AWS resource naming restrictions
+  cluster_name_safe = length(var.cluster_name) <= 32 ? var.cluster_name : "${trimright(substr(var.cluster_name, 0, 16), "-")}${substr(sha256(substr(var.cluster_name, 16, -1)), 0, 16)}"
+
   common_machine_config_patch = {
     machine = {
       kubelet = {
@@ -56,7 +62,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 3.0"
 
-  name = var.cluster_name
+  name = local.cluster_name_safe
   cidr = var.vpc_cidr
   tags = var.extra_tags
 
@@ -69,7 +75,7 @@ module "cluster_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "~> 4.0"
 
-  name        = var.cluster_name
+  name        = local.cluster_name_safe
   description = "Allow all intra-cluster and egress traffic"
   vpc_id      = module.vpc.vpc_id
   tags        = var.extra_tags
@@ -102,7 +108,7 @@ module "kubernetes_api_sg" {
   source  = "terraform-aws-modules/security-group/aws//modules/https-443"
   version = "~> 4.0"
 
-  name                = "${var.cluster_name}-k8s-api"
+  name                = "${local.cluster_name_safe}-k8s-api"
   description         = "Allow access to the Kubernetes API"
   vpc_id              = module.vpc.vpc_id
   ingress_cidr_blocks = [var.kubernetes_api_allowed_cidr]
@@ -113,7 +119,7 @@ module "elb_k8s_elb" {
   source  = "terraform-aws-modules/elb/aws"
   version = "~> 4.0"
 
-  name    = substr("${var.cluster_name}-k8s-api", 0, 32)
+  name    = substr("${local.cluster_name_safe}-k8s-api", 0, 32)
   subnets = module.vpc.public_subnets
   tags    = merge(var.extra_tags, local.cluster_required_tags)
   security_groups = [
@@ -146,7 +152,7 @@ module "elb_k8s_elb" {
 resource "aws_iam_policy" "control_plane_ccm_policy" {
   count = var.ccm ? 1 : 0
 
-  name        = "${var.cluster_name}-control-plane-ccm-policy"
+  name        = "${local.cluster_name_safe}-control-plane-ccm-policy"
   path        = "/"
   description = "IAM policy for the control plane nodes to allow CCM to manage AWS resources"
 
@@ -228,7 +234,7 @@ resource "aws_iam_policy" "control_plane_ccm_policy" {
 resource "aws_iam_policy" "worker_ccm_policy" {
   count = var.ccm ? 1 : 0
 
-  name        = "${var.cluster_name}-worker-ccm-policy"
+  name        = "${local.cluster_name_safe}-worker-ccm-policy"
   path        = "/"
   description = "IAM policy for the worker nodes to allow CCM to manage AWS resources"
 
@@ -261,7 +267,7 @@ module "talos_control_plane_nodes" {
 
   count = var.control_plane.num_instances
 
-  name                        = "${var.cluster_name}-control-plane-${count.index}"
+  name                        = "${local.cluster_name_safe}-control-plane-${count.index}"
   ami                         = var.control_plane.ami_id == null ? data.aws_ami.talos.id : var.control_plane.ami_id
   monitoring                  = true
   instance_type               = var.control_plane.instance_type
@@ -269,7 +275,7 @@ module "talos_control_plane_nodes" {
   iam_role_use_name_prefix    = false
   create_iam_instance_profile = var.ccm ? true : false
   iam_role_policies = var.ccm ? {
-    "${var.cluster_name}-control-plane-ccm-policy" : aws_iam_policy.control_plane_ccm_policy[0].arn,
+    "${local.cluster_name_safe}-control-plane-ccm-policy" : aws_iam_policy.control_plane_ccm_policy[0].arn,
   } : {}
   tags = merge(var.extra_tags, var.control_plane.tags, local.cluster_required_tags)
 
@@ -292,7 +298,7 @@ module "talos_worker_group" {
 
   for_each = merge([for info in var.worker_groups : { for index in range(0, info.num_instances) : "${info.name}.${index}" => info }]...)
 
-  name                        = "${var.cluster_name}-worker-group-${each.value.name}-${trimprefix(each.key, "${each.value.name}.")}"
+  name                        = "${local.cluster_name_safe}-worker-group-${each.value.name}-${trimprefix(each.key, "${each.value.name}.")}"
   ami                         = each.value.ami_id == null ? data.aws_ami.talos.id : each.value.ami_id
   monitoring                  = true
   instance_type               = each.value.instance_type
@@ -300,7 +306,7 @@ module "talos_worker_group" {
   iam_role_use_name_prefix    = false
   create_iam_instance_profile = var.ccm ? true : false
   iam_role_policies = var.ccm ? {
-    "${var.cluster_name}-worker-ccm-policy" : aws_iam_policy.worker_ccm_policy[0].arn,
+    "${local.cluster_name_safe}-worker-ccm-policy" : aws_iam_policy.worker_ccm_policy[0].arn,
   } : {}
   tags = merge(each.value.tags, var.extra_tags, local.cluster_required_tags)
 
