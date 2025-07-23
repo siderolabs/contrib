@@ -60,7 +60,7 @@ data "aws_ami" "talos" {
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 3.0"
+  version = "~> 6.0"
 
   name = local.cluster_name_safe
   cidr = var.vpc_cidr
@@ -73,7 +73,7 @@ module "vpc" {
 
 module "cluster_sg" {
   source  = "terraform-aws-modules/security-group/aws"
-  version = "~> 4.0"
+  version = "~> 5.0"
 
   name        = local.cluster_name_safe
   description = "Allow all intra-cluster and egress traffic"
@@ -106,7 +106,7 @@ module "cluster_sg" {
 
 module "kubernetes_api_sg" {
   source  = "terraform-aws-modules/security-group/aws//modules/https-443"
-  version = "~> 4.0"
+  version = "~> 5.0"
 
   name                = "${local.cluster_name_safe}-k8s-api"
   description         = "Allow access to the Kubernetes API"
@@ -263,7 +263,7 @@ resource "aws_iam_policy" "worker_ccm_policy" {
 
 module "talos_control_plane_nodes" {
   source  = "terraform-aws-modules/ec2-instance/aws"
-  version = "~> 4.0"
+  version = "~> 6.0"
 
   count = var.control_plane.num_instances
 
@@ -285,16 +285,14 @@ module "talos_control_plane_nodes" {
 
   vpc_security_group_ids = [module.cluster_sg.security_group_id]
 
-  root_block_device = [
-    {
-      volume_size = 100
-    }
-  ]
+  root_block_device = {
+    size = 100
+  }
 }
 
 module "talos_worker_group" {
   source  = "terraform-aws-modules/ec2-instance/aws"
-  version = "~> 4.0"
+  version = "~> 6.0"
 
   for_each = merge([for info in var.worker_groups : { for index in range(0, info.num_instances) : "${info.name}.${index}" => info }]...)
 
@@ -316,11 +314,10 @@ module "talos_worker_group" {
 
   vpc_security_group_ids = [module.cluster_sg.security_group_id]
 
-  root_block_device = [
-    {
-      volume_size = 100
-    }
-  ]
+  root_block_device = {
+    size = 100
+  }
+
 }
 
 resource "talos_machine_secrets" "this" {}
