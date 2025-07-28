@@ -274,10 +274,12 @@ module "talos_control_plane_nodes" {
   subnet_id                   = element(module.vpc.public_subnets, count.index)
   iam_role_use_name_prefix    = false
   create_iam_instance_profile = var.ccm ? true : false
+  associate_public_ip_address = true
   iam_role_policies = var.ccm ? {
     "${local.cluster_name_safe}-control-plane-ccm-policy" : aws_iam_policy.control_plane_ccm_policy[0].arn,
   } : {}
   tags = merge(var.extra_tags, var.control_plane.tags, local.cluster_required_tags)
+
 
   metadata_options = {
     "instance_metadata_tags" : "enabled"
@@ -303,6 +305,7 @@ module "talos_worker_group" {
   subnet_id                   = element(module.vpc.public_subnets, tonumber(trimprefix(each.key, "${each.value.name}.")))
   iam_role_use_name_prefix    = false
   create_iam_instance_profile = var.ccm ? true : false
+  associate_public_ip_address = true
   iam_role_policies = var.ccm ? {
     "${local.cluster_name_safe}-worker-ccm-policy" : aws_iam_policy.worker_ccm_policy[0].arn,
   } : {}
