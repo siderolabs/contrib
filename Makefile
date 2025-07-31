@@ -3,9 +3,9 @@ TAG ?= $(shell git describe --tag --always --dirty)
 TF_PROJECTS := $(shell find examples/terraform/ -name '.terraform' -prune -o -name 'main.tf' -exec dirname {} \;)
 
 # renovate: datasource=helm depName=aws-cloud-controller-manager
-AWS_CCM_HELM_CHART_VERSION ?= 0.0.8
+AWS_CCM_HELM_CHART_VERSION ?= 0.0.9
 # renovate: datasource=github-releases depName=kubernetes/cloud-provider-aws
-AWS_CCM_VERSION ?= v1.32.1
+AWS_CCM_VERSION ?= v1.33.0
 
 .PHONY: fmt
 fmt:
@@ -28,4 +28,4 @@ check-dirty: fmt generate ## Verifies that source tree is not dirty
 aws-ccm:
 	helm repo add aws-cloud-controller-manager https://kubernetes.github.io/cloud-provider-aws
 	helm repo update
-	helm template --version $(AWS_CCM_HELM_CHART_VERSION) aws-cloud-controller-manager aws-cloud-controller-manager/aws-cloud-controller-manager --set args="{--v=2,--cloud-provider=aws,--configure-cloud-routes=false}" --set image.tag=$(AWS_CCM_VERSION) > examples/terraform/aws/manifests/ccm.yaml
+	helm template --version $(AWS_CCM_HELM_CHART_VERSION) aws-cloud-controller-manager aws-cloud-controller-manager/aws-cloud-controller-manager --set args="{--v=2,--cloud-provider=aws,--configure-cloud-routes=false}" --set image.tag=$(AWS_CCM_VERSION) --set hostNetworking=true > examples/terraform/aws/manifests/ccm.yaml
