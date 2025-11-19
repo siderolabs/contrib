@@ -10,7 +10,7 @@ import (
 
 const (
 	ClusterName  = "talos"
-	TalosVersion = "v1.0.6"
+	TalosVersion = "v1.11.5"
 
 	ControlPlaneNodesCount = 3
 	WorkerNodesCount       = 2

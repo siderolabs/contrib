@@ -25,8 +25,8 @@ provider "registry.terraform.io/hashicorp/aws" {
 }
 
 provider "registry.terraform.io/siderolabs/talos" {
-  version     = "0.9.0-alpha.0"
-  constraints = "0.9.0-alpha.0"
+  version     = "0.9.0"
+  constraints = "0.9.0"
   hashes = [
     "h1:aJIAbggkIN/2/7JEjSz/PfHVFRXOokeHYt3hDII6kI0=",
     "h1:o7wdbrBjrbMp8NbjRNTypYLr4HsNiHjVyq9tO195gsE=",

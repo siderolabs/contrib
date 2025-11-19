@@ -42,8 +42,8 @@ provider "registry.terraform.io/hashicorp/google-beta" {
 }
 
 provider "registry.terraform.io/siderolabs/talos" {
-  version     = "0.9.0-alpha.0"
-  constraints = "0.9.0-alpha.0"
+  version     = "0.9.0"
+  constraints = "0.9.0"
   hashes = [
     "h1:aJIAbggkIN/2/7JEjSz/PfHVFRXOokeHYt3hDII6kI0=",
     "zh:0fa82a384b25a58b65523e0ea4768fa1212b1f5cfc0c9379d31162454fedcc9d",
