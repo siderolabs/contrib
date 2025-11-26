@@ -11,7 +11,7 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_google"></a> [google](#provider\_google) | 6.35.0 |
+| <a name="provider_google"></a> [google](#provider\_google) | 6.50.0 |
 | <a name="provider_talos"></a> [talos](#provider\_talos) | 0.9.0 |
 
 ## Modules
