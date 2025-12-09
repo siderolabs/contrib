@@ -1,0 +1,17 @@
+---
+# Leave room for the omni-data partition
+apiVersion: v1alpha1
+kind: VolumeConfig
+name: EPHEMERAL
+provisioning:
+  maxSize: ${MACHINE_EPHEMERAL_PARTITION_SIZE}
+---
+# Separate partition for the Omni database, in this example located on the system disk
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: omni-data # will be mounted at /var/mnt/omni-data
+provisioning:
+  diskSelector:
+    match: "'${MACHINE_INSTALL_DISK}' in disk.symlinks"
+  minSize: 10GB
+  maxSize: 10GB

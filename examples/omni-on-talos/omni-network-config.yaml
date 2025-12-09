@@ -1,0 +1,21 @@
+---
+# Configure network with dedicated IPs for Omni and authentication service
+machine:
+  network:
+    interfaces:
+      - interface: # Add either this...
+        deviceSelector: # ... or this, respectively
+        addresses:
+          # Adapt CIDR mask bits to your preference
+          - ${OMNI_IP}/28      # Omni service IP
+          - ${OMNI_AUTH_IP}/28 # Dex service IP
+
+  # Pick basic machine IP for Kubernetes node IP
+  kubelet:
+    nodeIP:
+      validSubnets: ["${MACHINE_NET_IP}/32"]
+
+# Pick basic machine IP for etcd, too
+cluster:
+  etcd:
+    advertisedSubnets: ["${MACHINE_NET_IP}/32"]

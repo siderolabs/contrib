@@ -20,3 +20,4 @@ The examples provided are maintained on a best effort basis and please file issu
 ## Omni Example
 
 - [Omni](./examples/omni)
+- [Omni self-hosted on Talos](./examples/omni-on-talos)

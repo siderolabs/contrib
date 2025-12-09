@@ -1,0 +1,277 @@
+---
+# Omni application deployment
+# Note: Talos only applies this during reboot! It can however be reapplied with
+# yq -r '.cluster.inlineManifests[].contents | "---\n\(.)"' omni-app-manifests.yaml | kubectl apply --filename=/dev/stdin
+cluster:
+  inlineManifests:
+    - name: namespace
+      contents: |
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: omni
+
+    # Dex standalone OIDC provider for Omni
+    - name: dex
+      contents: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: dex
+          namespace: omni
+        spec:
+          replicas: 1
+          strategy:
+            type: Recreate
+          selector:
+            matchLabels: &labels
+              app: dex
+          template:
+            metadata:
+              labels: *labels
+            spec:
+              serviceAccountName: dex
+              priorityClassName: system-cluster-critical
+              containers:
+                - name: dex
+                  image: ghcr.io/dexidp/dex:${DEX_IMAGE_TAG}
+                  command: [/usr/local/bin/dex, serve, /etc/dex/cfg/config.yaml]
+                  ports:
+                    - name: https
+                      containerPort: 8080
+                      hostPort: 443
+                      hostIP: ${OMNI_AUTH_IP}
+                  readinessProbe:
+                    httpGet:
+                      path: /healthz
+                      port: 8080
+                      scheme: HTTPS
+                  securityContext:
+                    runAsNonRoot: true
+                    capabilities:
+                      drop: [ALL]
+                  volumeMounts:
+                    - name: config
+                      mountPath: /etc/dex/cfg
+                      readOnly: true
+                    - name: tls
+                      mountPath: /etc/dex/tls
+                      readOnly: true
+              volumes:
+                - name: config
+                  secret:
+                    secretName: dex-config
+                - name: tls
+                  secret:
+                    secretName: dex-tls
+        ---
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: dex-config
+          namespace: omni
+        stringData:
+          config.yaml: |
+            issuer: https://auth.${OMNI_DOMAIN}
+            storage:
+              type: kubernetes
+              config:
+                inCluster: true
+            web:
+              https: 0.0.0.0:8080
+              tlsCert: /etc/dex/tls/tls.crt
+              tlsKey: /etc/dex/tls/tls.key
+            oauth2:
+              passwordConnector: local
+              skipApprovalScreen: true
+            enablePasswordDB: true
+
+            staticClients:
+              - name: Omni
+                id: omni
+                secret: ${OMNI_AUTH_CLIENT_SECRET}
+                redirectURIs: [https://${OMNI_DOMAIN}/oidc/consume]
+
+            # Omni users are defined here
+            # Make sure to restart the dex pod after adding new users
+            staticPasswords:
+              - username: user42
+                email: ${OMNI_INITIAL_USER_EMAIL}
+                # htpasswd -BnC 15 user42 | cut --delimiter=: --fields=1 --complement
+                hash: "$2y$15$abcdef..."
+                # uuidgen
+                userID: 00000000-0000-0000-0000-000000000000
+        ---
+        apiVersion: v1
+        kind: ServiceAccount
+        metadata:
+          name: dex
+          namespace: omni
+        ---
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRole
+        metadata:
+          name: dex
+        rules:
+          - apiGroups: [dex.coreos.com]
+            resources: ["*"]
+            verbs: ["*"]
+          - apiGroups: [apiextensions.k8s.io]
+            resources: [customresourcedefinitions]
+            verbs: [create]
+        ---
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRoleBinding
+        metadata:
+          name: dex
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: dex
+        subjects:
+          - kind: ServiceAccount
+            name: dex
+            namespace: omni
+        ---
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: dex-tls
+          namespace: omni
+        type: kubernetes.io/tls
+        data:
+          tls.crt: ${OMNI_AUTH_CRT}
+          tls.key: ${OMNI_AUTH_KEY}
+
+    # The Omni container itself
+    - name: omni
+      contents: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: omni
+          namespace: omni
+        spec:
+          replicas: 1
+          strategy:
+            type: Recreate
+          selector:
+            matchLabels: &labels
+              app: omni
+          template:
+            metadata:
+              labels: *labels
+            spec:
+              priorityClassName: system-cluster-critical
+              containers:
+                - name: omni
+                  image: ghcr.io/siderolabs/omni:${OMNI_IMAGE_TAG}
+                  args:
+                    - --name=${OMNI_NAME}
+                    - --account-id=${OMNI_ACCOUNT_ID}
+                    - --private-key-source=file:///omni.asc
+                    - --event-sink-port=8091
+                    - --etcd-embedded=true
+                    - --bind-addr=0.0.0.0:443
+                    - --machine-api-bind-addr=0.0.0.0:8090
+                    - --k8s-proxy-bind-addr=0.0.0.0:8100
+                    - --advertised-api-url=https://${OMNI_DOMAIN}/
+                    - --advertised-kubernetes-proxy-url=https://${OMNI_DOMAIN}:8100/
+                    - --siderolink-api-advertised-url=https://${OMNI_DOMAIN}:8090/
+                    - --siderolink-wireguard-advertised-addr=${OMNI_IP}:50180
+                    - --auth-oidc-enabled
+                    - --auth-oidc-provider-url=https://auth.${OMNI_DOMAIN}
+                    - --auth-oidc-client-id=omni
+                    - --auth-oidc-client-secret=$(OIDC_CLIENT_SECRET)
+                    - --auth-oidc-scopes=openid
+                    - --auth-oidc-scopes=profile
+                    - --auth-oidc-scopes=email
+                    - --initial-users=${OMNI_INITIAL_USER_EMAIL}
+                    - --cert=/etc/omni/tls/tls.crt
+                    - --key=/etc/omni/tls/tls.key
+                    - --machine-api-cert=/etc/omni/tls/tls.crt
+                    - --machine-api-key=/etc/omni/tls/tls.key
+                  env:
+                    - name: OIDC_CLIENT_SECRET
+                      valueFrom:
+                        secretKeyRef:
+                          name: omni-oidc
+                          key: clientSecret
+                  ports:
+                    - name: https
+                      containerPort: 443
+                      hostPort: 443
+                      hostIP: ${OMNI_IP}
+                      protocol: TCP
+                    - name: siderolink
+                      containerPort: 8090
+                      hostPort: 8090
+                      hostIP: ${OMNI_IP}
+                      protocol: TCP
+                    - name: k8s-proxy
+                      containerPort: 8100
+                      hostPort: 8100
+                      hostIP: ${OMNI_IP}
+                      protocol: TCP
+                    - name: wireguard
+                      containerPort: 50180
+                      hostPort: 50180
+                      hostIP: ${OMNI_IP}
+                      protocol: UDP
+                  securityContext:
+                    capabilities:
+                      add: [NET_ADMIN]
+                      drop: [ALL]
+                  volumeMounts:
+                    - name: tls
+                      mountPath: /etc/omni/tls/
+                      readOnly: true
+                    - name: asc
+                      mountPath: /omni.asc
+                      subPath: omni.asc
+                      readOnly: true
+                    - name: etcd
+                      mountPath: /_out
+                    - name: wireguard
+                      mountPath: /dev/net/tun
+              volumes:
+                - name: tls
+                  secret:
+                    secretName: omni-tls
+                - name: asc
+                  secret:
+                    secretName: omni-asc
+                - name: etcd
+                  hostPath:
+                    path: /var/mnt/omni-data/
+                    type: DirectoryOrCreate
+                - name: wireguard
+                  hostPath:
+                    path: /dev/net/tun
+                    type: CharDevice
+        ---
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: omni-tls
+          namespace: omni
+        type: kubernetes.io/tls
+        data:
+          tls.crt: ${OMNI_CRT}
+          tls.key: ${OMNI_KEY}
+        ---
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: omni-asc
+          namespace: omni
+        data:
+          omni.asc: ${OMNI_ASC}
+        ---
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: omni-oidc
+          namespace: omni
+        stringData:
+          clientSecret: ${OMNI_AUTH_CLIENT_SECRET}

@@ -1,0 +1,16 @@
+---
+# Options for a single-node Talos cluster
+machine:
+  network:
+    kubespan:
+      enabled: false
+
+  features:
+    kubePrism:
+      enabled: false
+
+cluster:
+  allowSchedulingOnControlPlanes: true
+
+  discovery:
+    enabled: false
