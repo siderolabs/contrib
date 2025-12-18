@@ -172,6 +172,8 @@ cluster:
                     - --private-key-source=file:///omni.asc
                     - --event-sink-port=8091
                     - --etcd-embedded=true
+                    - --etcd-embedded-db-path=_out/etcd/
+                    - --sqlite-storage-path=_out/sqlite.db
                     - --bind-addr=0.0.0.0:443
                     - --machine-api-bind-addr=0.0.0.0:8090
                     - --k8s-proxy-bind-addr=0.0.0.0:8100
@@ -230,7 +232,7 @@ cluster:
                       mountPath: /omni.asc
                       subPath: omni.asc
                       readOnly: true
-                    - name: etcd
+                    - name: data
                       mountPath: /_out
                     - name: wireguard
                       mountPath: /dev/net/tun
@@ -241,7 +243,7 @@ cluster:
                 - name: asc
                   secret:
                     secretName: omni-asc
-                - name: etcd
+                - name: data
                   hostPath:
                     path: /var/mnt/omni-data/
                     type: DirectoryOrCreate
