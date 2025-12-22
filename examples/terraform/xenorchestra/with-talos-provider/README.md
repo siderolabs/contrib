@@ -33,6 +33,7 @@ No modules.
 | [xenorchestra_network.net](https://registry.terraform.io/providers/vatesfr/xenorchestra/latest/docs/data-sources/network) | data source |
 | [xenorchestra_pool.pool](https://registry.terraform.io/providers/vatesfr/xenorchestra/latest/docs/data-sources/pool) | data source |
 | [xenorchestra_sr.shared_storage](https://registry.terraform.io/providers/vatesfr/xenorchestra/latest/docs/data-sources/sr) | data source |
+| [xenorchestra_vdi.iso](https://registry.terraform.io/providers/vatesfr/xenorchestra/latest/docs/data-sources/vdi) | data source |
 
 ## Inputs
 
@@ -45,6 +46,7 @@ No modules.
 | <a name="input_cp_disk_size_gb"></a> [cp\_disk\_size\_gb](#input\_cp\_disk\_size\_gb) | Control plane disk size in GB | `number` | `20` | no |
 | <a name="input_cp_memory_gb"></a> [cp\_memory\_gb](#input\_cp\_memory\_gb) | Memory size for control plane in GB | `number` | `4` | no |
 | <a name="input_expected_ip_cidr"></a> [expected\_ip\_cidr](#input\_expected\_ip\_cidr) | Determines the IP CIDR range the provider will wait for on this network interface. | `string` | n/a | yes |
+| <a name="input_iso_name"></a> [iso\_name](#input\_iso\_name) | ISO name label to mount on control plane nodes (optional). If provided, will also add /machine/install patches. | `string` | `null` | no |
 | <a name="input_network_name"></a> [network\_name](#input\_network\_name) | Network name label | `string` | n/a | yes |
 | <a name="input_num_control_plane"></a> [num\_control\_plane](#input\_num\_control\_plane) | Number of control plane nodes to create | `number` | `3` | no |
 | <a name="input_num_workers"></a> [num\_workers](#input\_num\_workers) | Number of worker nodes to create | `number` | `1` | no |

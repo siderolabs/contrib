@@ -14,6 +14,12 @@ variable "tpl_talos_id" {
   type        = string
 }
 
+variable "iso_name" {
+  description = "ISO name label to mount on control plane nodes (optional). If provided, will also add /machine/install patches."
+  type        = string
+  default     = null
+}
+
 variable "pool_name" {
   description = "Pool name label"
   type        = string
