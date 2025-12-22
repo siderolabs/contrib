@@ -17,6 +17,12 @@ data "xenorchestra_network" "net" {
   pool_id    = data.xenorchestra_pool.pool.id
 }
 
+data "xenorchestra_vdi" "iso" {
+  count      = var.iso_name != null ? 1 : 0
+  name_label = var.iso_name
+  pool_id    = data.xenorchestra_pool.pool.id
+}
+
 resource "xenorchestra_vm" "cp" {
   memory_max       = var.cp_memory_gb * local.size_1GB
   cpus             = var.cp_cpus
@@ -26,6 +32,13 @@ resource "xenorchestra_vm" "cp" {
 
   hvm_boot_firmware = "uefi"
   secure_boot       = false
+
+  dynamic "cdrom" {
+    for_each = var.iso_name != null ? [1] : []
+    content {
+      id = data.xenorchestra_vdi.iso[0].id
+    }
+  }
 
   network {
     network_id       = data.xenorchestra_network.net.id
@@ -51,6 +64,13 @@ resource "xenorchestra_vm" "worker" {
   hvm_boot_firmware = "uefi"
   secure_boot       = false
 
+  dynamic "cdrom" {
+    for_each = var.iso_name != null ? [1] : []
+    content {
+      id = data.xenorchestra_vdi.iso[0].id
+    }
+  }
+
   network {
     network_id       = data.xenorchestra_network.net.id
     expected_ip_cidr = var.expected_ip_cidr
@@ -74,7 +94,16 @@ data "talos_machine_configuration" "controlplane" {
   cluster_endpoint = local.cluster_endpoint
   machine_type     = "controlplane"
   machine_secrets  = talos_machine_secrets.this.machine_secrets
-  config_patches = [<<EOF
+  config_patches = concat(
+    var.iso_name != null ? [<<EOF
+- op: add
+  path: /machine/install
+  value:
+    disk: /dev/xvda
+    image: factory.talos.dev/nocloud-installer/53b20d86399013eadfd44ee49804c1fef069bfdee3b43f3f3f5a2f57c03338ac:v1.11.5
+EOF
+    ] : [],
+    [<<EOF
 - op: add
   path: /machine/network
   value:
@@ -84,7 +113,8 @@ data "talos_machine_configuration" "controlplane" {
         vip:
           ip: "${var.cluster_vip}"
 EOF
-  ]
+    ]
+  )
 }
 
 data "talos_machine_configuration" "worker" {
@@ -92,6 +122,14 @@ data "talos_machine_configuration" "worker" {
   cluster_endpoint = local.cluster_endpoint
   machine_type     = "worker"
   machine_secrets  = talos_machine_secrets.this.machine_secrets
+  config_patches = var.iso_name != null ? [<<EOF
+- op: add
+  path: /machine/install
+  value:
+    disk: /dev/xvda
+    image: factory.talos.dev/nocloud-installer/53b20d86399013eadfd44ee49804c1fef069bfdee3b43f3f3f5a2f57c03338ac:v1.11.5
+EOF
+  ] : []
 }
 
 data "talos_client_configuration" "this" {
