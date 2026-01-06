@@ -5,7 +5,7 @@
 
 ## Simple example
 
-This example provides a Terraform alternative to using the Xen Orchestra UI for VM creation. It automates the VM provisioning step but requires pre-generated Talos configurations. [Read the doc about Talos in Xen Orchestra](https://docs.siderolabs.com/talos/v1.11/platform-specific-installations/virtualized-platforms/xenorchestra-xcpng) to create the template VM.
+This example provides a Terraform alternative to using the Xen Orchestra UI for VM creation. It automates the VM provisioning step but requires pre-generated Talos configurations. [Read the doc about Talos in Xen Orchestra](https://docs.siderolabs.com/talos/latest/platform-specific-installations/virtualized-platforms/xenorchestra-xcpng) to create the template VM.
 
 **This replaces steps 2 and 3 of the "_Create the Talos cluster_" section in the guide.**
 
@@ -41,10 +41,12 @@ Key features:
 * Generates and outputs both `talosconfig` and `kubeconfig`
 * Supports multiple control plane and worker nodes
 * No manual Talos configuration required
+* **Two installation modes**: pre-installed template or ISO-based installation
 
 ### Prerequisites
 
-* A Talos VM template created in Xen Orchestra (see [documentation](https://docs.siderolabs.com/talos/v1.11/platform-specific-installations/virtualized-platforms/xenorchestra-xcpng))
+* **For template-based deployment**: A Talos VM template with Talos pre-installed (see [documentation](https://docs.siderolabs.com/talos/v1.11/platform-specific-installations/virtualized-platforms/xenorchestra-xcpng))
+* **For ISO-based installation**: A Talos ISO uploaded to Xen Orchestra and a minimal VM template (`Generic Linux UEFI`)
 * Xen Orchestra API token
 * Terraform installed
 * A network with DHCP configured in your Xen Orchestra environment
@@ -69,6 +71,8 @@ expected_ip_cidr = "10.1.0.0/16"
 
 cluster_name = "demo-talos"
 cluster_vip  = "10.1.0.10"  # Virtual IP for the cluster endpoint
+
+talos_version = "v1.11.5"  # Talos version to install (used with ISO-based installation)
 
 # Optional: customize node sizing
 num_control_plane = 3
@@ -100,6 +104,41 @@ kubectl get nodes -o wide
 ```
 
 ### Configuration Details
+
+#### Installation Modes
+
+This example supports two installation modes:
+
+**1. Template-based deployment**
+
+Uses a pre-installed Talos VM template. This is the default mode when `iso_name` is not specified.
+
+```hcl
+# In terraform.tfvars - no iso_name variable needed
+tpl_talos_id = "<talos_template_id>"
+```
+
+**2. ISO-based installation**
+
+Mounts a Talos ISO and installs Talos to disk during provisioning. Useful for:
+- Installing specific Talos versions
+- Custom installation images
+- Environments without pre-built templates
+
+```hcl
+# In terraform.tfvars
+tpl_talos_id = "<minimal_vm_template_id>"  # Any UEFI template (recommended: `Generic Linux UEFI`)
+iso_name      = "talos-nocloud-amd64.iso"  # ISO name in Xen Orchestra
+talos_version = "v1.11.5"                   # Talos version to install
+```
+
+When `iso_name` is provided:
+- The ISO is mounted on all VMs via CDROM
+- Installation configuration is added to Talos machine configs
+- VMs will install Talos to `/dev/xvda` on first boot
+- Installer image uses the specified `talos_version` with factory image `factory.talos.dev/nocloud-installer/53b20d86399013eadfd44ee49804c1fef069bfdee3b43f3f3f5a2f57c03338ac`
+
+#### Cluster Endpoint
 
 The `cluster_endpoint` variable defaults to `https://<cluster_vip>:6443` if not explicitly set. You can override it if needed:
 

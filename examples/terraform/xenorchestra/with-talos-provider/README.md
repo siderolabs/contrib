@@ -52,6 +52,7 @@ No modules.
 | <a name="input_num_workers"></a> [num\_workers](#input\_num\_workers) | Number of worker nodes to create | `number` | `1` | no |
 | <a name="input_pool_name"></a> [pool\_name](#input\_pool\_name) | Pool name label | `string` | n/a | yes |
 | <a name="input_sr_name"></a> [sr\_name](#input\_sr\_name) | Shared storage name label | `string` | n/a | yes |
+| <a name="input_talos_version"></a> [talos\_version](#input\_talos\_version) | Talos version to install (iso installation only) | `string` | n/a | yes |
 | <a name="input_tpl_talos_id"></a> [tpl\_talos\_id](#input\_tpl\_talos\_id) | Talos template ID | `string` | n/a | yes |
 | <a name="input_worker_cpus"></a> [worker\_cpus](#input\_worker\_cpus) | Number of CPUs for worker | `number` | `2` | no |
 | <a name="input_worker_disk_size_gb"></a> [worker\_disk\_size\_gb](#input\_worker\_disk\_size\_gb) | Worker disk size in GB | `number` | `20` | no |

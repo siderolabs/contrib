@@ -104,3 +104,8 @@ variable "worker_disk_size_gb" {
   type        = number
   default     = 20
 }
+
+variable "talos_version" {
+  description = "Talos version to install (iso installation only)"
+  type        = string
+}

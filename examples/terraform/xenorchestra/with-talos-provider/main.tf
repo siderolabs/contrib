@@ -100,7 +100,7 @@ data "talos_machine_configuration" "controlplane" {
   path: /machine/install
   value:
     disk: /dev/xvda
-    image: factory.talos.dev/nocloud-installer/53b20d86399013eadfd44ee49804c1fef069bfdee3b43f3f3f5a2f57c03338ac:v1.11.5
+    image: factory.talos.dev/nocloud-installer/53b20d86399013eadfd44ee49804c1fef069bfdee3b43f3f3f5a2f57c03338ac:${var.talos_version}
 EOF
     ] : [],
     [<<EOF
@@ -127,7 +127,7 @@ data "talos_machine_configuration" "worker" {
   path: /machine/install
   value:
     disk: /dev/xvda
-    image: factory.talos.dev/nocloud-installer/53b20d86399013eadfd44ee49804c1fef069bfdee3b43f3f3f5a2f57c03338ac:v1.11.5
+    image: factory.talos.dev/nocloud-installer/53b20d86399013eadfd44ee49804c1fef069bfdee3b43f3f3f5a2f57c03338ac:${var.talos_version}
 EOF
   ] : []
 }
