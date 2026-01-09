@@ -10,7 +10,7 @@
 | Name | Version |
 |------|---------|
 | <a name="provider_talos"></a> [talos](#provider\_talos) | 0.9.0 |
-| <a name="provider_xenorchestra"></a> [xenorchestra](#provider\_xenorchestra) | 0.37.0 |
+| <a name="provider_xenorchestra"></a> [xenorchestra](#provider\_xenorchestra) | n/a |
 
 ## Modules
 
