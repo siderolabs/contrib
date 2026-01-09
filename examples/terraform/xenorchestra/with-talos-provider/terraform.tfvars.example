@@ -1,0 +1,21 @@
+xoa_token = "<your_xen_orchestra_api_token>"
+xoa_url   = "<your_xoa_server_address>"
+
+tpl_talos_id = "<talos_template_id>"
+pool_name    = "<pool_name_label>"
+sr_name      = "<shared_storage_name_label>"
+network_name = "<network_name_label>"
+expected_ip_cidr = "10.1.0.0/16"
+
+cluster_name = "demo-talos"
+cluster_vip = "10.1.0.10"
+
+talos_version = "v1.11.5"
+
+cp_cpus         = 2
+cp_memory_gb    = 4
+cp_disk_size_gb = 20
+
+worker_cpus         = 2
+worker_memory_gb    = 4
+worker_disk_size_gb = 20
