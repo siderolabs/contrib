@@ -5,6 +5,7 @@ provider "registry.terraform.io/vatesfr/xenorchestra" {
   version = "0.37.1"
   hashes = [
     "h1:+NpNIRHEPouDouczkROb75TSxkHPvA7X/VDM/H07mqI=",
+    "h1:w2T9M99H7NE0umHSl5ireAAdbs9VFrnXsgpevHDnipI=",
     "zh:0231a0aa178825797adec7a4e6fbec29ac856b816002205e7e917774b77ca0dc",
     "zh:1ef73a0f7ff1cef9cdbc4388aa3d2f09dd38a861fb005b386349166b802f0c2c",
     "zh:30495fe8172aed6f111754d87bf9070e164e59fdb3e27249b99c70659924b371",

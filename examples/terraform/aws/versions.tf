@@ -1,9 +1,8 @@
 terraform {
-  required_version = "~> 1.3"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.21.0"
+      version = "~> 6.28.0"
     }
     talos = {
       source  = "siderolabs/talos"
