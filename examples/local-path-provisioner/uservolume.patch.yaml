@@ -1,0 +1,9 @@
+# uservolume.patch.yaml
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: local-path
+provisioning:
+  diskSelector:
+    match: 'system_disk'
+  minSize: 1GB
+  maxSize: 1GB
