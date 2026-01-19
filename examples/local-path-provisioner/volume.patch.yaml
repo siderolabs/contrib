@@ -1,0 +1,17 @@
+# volume.patch.yaml
+apiVersion: v1alpha1
+kind: VolumeConfig
+name: EPHEMERAL
+provisioning:
+  diskSelector:
+    match: disk.transport == 'virtio' # double check / adjust this!
+  maxSize: 5GiB
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: local-path
+volumeType: partition
+provisioning:
+  diskSelector:
+    match: system_disk
+  maxSize: 5GiB
