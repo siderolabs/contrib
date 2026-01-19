@@ -67,6 +67,35 @@ cluster:
 - Talos Linux v1.12 or later
 - Sufficient disk space on the system disk for the user volume
 
+## Testing the Setup
+
+A sample nginx workload is provided in the `workload/` directory to test the local path provisioner:
+
+- [`pvc.yaml`](workload/pvc.yaml) - PersistentVolumeClaim requesting 500Mi of storage
+- [`deployment.yaml`](workload/deployment.yaml) - Nginx deployment using the PVC
+- [`service.yaml`](workload/service.yaml) - Service exposing the nginx deployment
+- [`kustomization.yaml`](workload/kustomization.yaml) - Kustomize configuration for the workload
+
+Deploy the test workload using kustomize:
+
+```bash
+kubectl apply -k workload/
+```
+
+Or deploy individual manifests:
+
+```bash
+kubectl apply -f workload/pvc.yaml
+kubectl apply -f workload/deployment.yaml
+kubectl apply -f workload/service.yaml
+```
+
+Verify the PVC is bound:
+
+```bash
+kubectl get pvc nginx-pvc
+```
+
 ## Regenerating the Manifest
 
 If you modify the kustomization configuration, regenerate the manifest file:
