@@ -3,7 +3,7 @@ module azure
 go 1.18
 
 require (
-	github.com/pulumi/pulumi-azure/sdk/v5 v5.3.0
+	github.com/pulumi/pulumi-azure/sdk/v5 v5.89.1
 	github.com/pulumi/pulumi/sdk/v3 v3.33.2
 	github.com/siderolabs/pulumi-provider-talos/sdk v0.0.0-20220606192808-8b9d2507e9f3
 )
