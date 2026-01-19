@@ -8,7 +8,7 @@ This example configures a local storage provisioner for Kubernetes clusters runn
 
 ## Components
 
-### 1. User Volume Configuration (`uservolume.patch.yaml`)
+### 1. User Volume Configuration (`volume.patch.yaml`)
 
 Defines a user volume that reserves space on the system disk for local storage:
 
@@ -21,7 +21,7 @@ Defines a user volume that reserves space on the system disk for local storage:
 Deploys and configures the Local Path Provisioner with the following customizations:
 
 - **Base Resource**: Local Path Provisioner v0.0.34 from the official repository
-- **Storage Path**: Configures `/var/local-path` as the storage location
+- **Storage Path**: Configures `/var/mnt/local-path` as the storage location
 - **Default Storage Class**: Sets the `local-path` StorageClass as the default
 - **Security**: Configures the namespace with privileged pod security enforcement
 
@@ -57,7 +57,7 @@ cluster:
 
 ## How It Works
 
-1. The `uservolume.patch.yaml` creates a 1GB user volume on the system disk at `/var/local-path`
+1. The `volume.patch.yaml` creates a 1GB user volume on the system disk at `/var/mnt/local-path`
 2. The Local Path Provisioner is deployed via `extraManifests` during cluster bootstrap
 3. The provisioner uses the pre-configured user volume to create persistent volumes dynamically
 4. The `local-path` StorageClass is set as the default, allowing automatic volume provisioning for PVCs
