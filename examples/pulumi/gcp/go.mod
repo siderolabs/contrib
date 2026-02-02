@@ -3,7 +3,7 @@ module gcp
 go 1.17
 
 require (
-	github.com/pulumi/pulumi-gcp/sdk/v6 v6.25.0
+	github.com/pulumi/pulumi-gcp/sdk/v6 v6.67.1
 	github.com/pulumi/pulumi/sdk/v3 v3.33.2
 	github.com/siderolabs/pulumi-provider-talos/sdk v0.0.0-20220606192808-8b9d2507e9f3
 )
