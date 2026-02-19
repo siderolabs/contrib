@@ -1,6 +1,6 @@
 apiVersion: v2
 name: &name rook-ceph
-version: &version v1.18.5
+version: &version v1.19.1
 dependencies:
   - name: *name 
     version: *version 
