@@ -5,7 +5,7 @@ TF_PROJECTS := $(shell find examples/terraform/ -name '.terraform' -prune -o -na
 # renovate: datasource=helm depName=aws-cloud-controller-manager
 AWS_CCM_HELM_CHART_VERSION ?= 0.0.9
 # renovate: datasource=github-releases depName=kubernetes/cloud-provider-aws
-AWS_CCM_VERSION ?= v1.33.0
+AWS_CCM_VERSION ?= v1.35.0
 
 .PHONY: fmt
 fmt:

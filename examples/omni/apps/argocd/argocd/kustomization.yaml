@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: argocd
 resources:
   - namespace.yaml
-  - github.com/argoproj/argo-cd/manifests/cluster-install?ref=v3.1.9
+  - github.com/argoproj/argo-cd/manifests/cluster-install?ref=v3.3.1
   - bootstrap-app-set.yaml
 
 patches:
