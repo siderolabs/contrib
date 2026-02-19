@@ -1,6 +1,6 @@
 apiVersion: v2
 name: &name cilium
-version: &version v1.18.3
+version: &version 1.19.1
 dependencies:
   - name: *name
     version: *version 
