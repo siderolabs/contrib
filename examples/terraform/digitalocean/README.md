@@ -22,14 +22,14 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_digitalocean"></a> [digitalocean](#requirement\_digitalocean) | 2.28.0 |
 | <a name="requirement_talos"></a> [talos](#requirement\_talos) | 0.11.0-beta.1 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_digitalocean"></a> [digitalocean](#provider\_digitalocean) | 2.28.0 |
 | <a name="provider_talos"></a> [talos](#provider\_talos) | 0.11.0-beta.1 |
 | <a name="provider_tls"></a> [tls](#provider\_tls) | 4.2.1 |
@@ -41,7 +41,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [digitalocean_custom_image.talos_custom_image](https://registry.terraform.io/providers/digitalocean/digitalocean/2.28.0/docs/resources/custom_image) | resource |
 | [digitalocean_droplet.talos_control_plane](https://registry.terraform.io/providers/digitalocean/digitalocean/2.28.0/docs/resources/droplet) | resource |
 | [digitalocean_droplet.talos_workers](https://registry.terraform.io/providers/digitalocean/digitalocean/2.28.0/docs/resources/droplet) | resource |
@@ -60,7 +60,7 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of cluster | `string` | `"talos-do"` | no |
 | <a name="input_do_plan_control_plane"></a> [do\_plan\_control\_plane](#input\_do\_plan\_control\_plane) | DO plan to use for control plane nodes | `string` | `"s-2vcpu-4gb"` | no |
 | <a name="input_do_plan_worker"></a> [do\_plan\_worker](#input\_do\_plan\_worker) | DO plan to use for worker nodes | `string` | `"s-2vcpu-4gb"` | no |
@@ -72,7 +72,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_kubeconfig"></a> [kubeconfig](#output\_kubeconfig) | n/a |
 | <a name="output_talosconfig"></a> [talosconfig](#output\_talosconfig) | n/a |
 <!-- END_TF_DOCS -->

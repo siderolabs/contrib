@@ -21,14 +21,14 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_talos"></a> [talos](#requirement\_talos) | 0.11.0-beta.1 |
 | <a name="requirement_vultr"></a> [vultr](#requirement\_vultr) | 2.12.0 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_talos"></a> [talos](#provider\_talos) | 0.11.0-beta.1 |
 | <a name="provider_vultr"></a> [vultr](#provider\_vultr) | 2.12.0 |
 
@@ -39,7 +39,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [talos_cluster_kubeconfig.this](https://registry.terraform.io/providers/siderolabs/talos/0.11.0-beta.1/docs/resources/cluster_kubeconfig) | resource |
 | [talos_machine_bootstrap.this](https://registry.terraform.io/providers/siderolabs/talos/0.11.0-beta.1/docs/resources/machine_bootstrap) | resource |
 | [talos_machine_configuration_apply.controlplane](https://registry.terraform.io/providers/siderolabs/talos/0.11.0-beta.1/docs/resources/machine_configuration_apply) | resource |
@@ -55,7 +55,7 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of cluster | `string` | `"talos-vultr"` | no |
 | <a name="input_num_control_plane"></a> [num\_control\_plane](#input\_num\_control\_plane) | Number of control plane nodes to create | `number` | `3` | no |
 | <a name="input_num_workers"></a> [num\_workers](#input\_num\_workers) | Number of worker nodes to create | `number` | `1` | no |
@@ -65,7 +65,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_kubeconfig"></a> [kubeconfig](#output\_kubeconfig) | n/a |
 | <a name="output_talosconfig"></a> [talosconfig](#output\_talosconfig) | n/a |
 <!-- END_TF_DOCS -->

@@ -24,7 +24,7 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_libvirt"></a> [libvirt](#requirement\_libvirt) | 0.7.1 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | 3.5.1 |
 | <a name="requirement_talos"></a> [talos](#requirement\_talos) | 0.11.0-beta.1 |
@@ -33,7 +33,7 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_libvirt"></a> [libvirt](#provider\_libvirt) | 0.7.1 |
 | <a name="provider_random"></a> [random](#provider\_random) | 3.5.1 |
 | <a name="provider_talos"></a> [talos](#provider\_talos) | 0.11.0-beta.1 |
@@ -42,14 +42,14 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_bootstrap_token"></a> [bootstrap\_token](#module\_bootstrap\_token) | ./modules/bootstrap_token | n/a |
 | <a name="module_trustdinfo_token"></a> [trustdinfo\_token](#module\_trustdinfo\_token) | ./modules/bootstrap_token | n/a |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [libvirt_domain.cp](https://registry.terraform.io/providers/dmacvicar/libvirt/0.7.1/docs/resources/domain) | resource |
 | [libvirt_volume.cp](https://registry.terraform.io/providers/dmacvicar/libvirt/0.7.1/docs/resources/volume) | resource |
 | [random_id.cluster_id](https://registry.terraform.io/providers/hashicorp/random/3.5.1/docs/resources/id) | resource |
@@ -78,14 +78,14 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | A name to provide for the Talos cluster | `string` | n/a | yes |
 | <a name="input_iso_path"></a> [iso\_path](#input\_iso\_path) | Path to the Talos ISO | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_kubeconfig"></a> [kubeconfig](#output\_kubeconfig) | n/a |
 | <a name="output_talosconfig"></a> [talosconfig](#output\_talosconfig) | n/a |
 <!-- END_TF_DOCS -->

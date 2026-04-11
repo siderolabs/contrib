@@ -2,14 +2,14 @@
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_hcloud"></a> [hcloud](#requirement\_hcloud) | 1.48.1 |
 | <a name="requirement_talos"></a> [talos](#requirement\_talos) | 0.11.0-beta.1 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_hcloud"></a> [hcloud](#provider\_hcloud) | 1.48.1 |
 | <a name="provider_talos"></a> [talos](#provider\_talos) | 0.11.0-beta.1 |
 
@@ -20,7 +20,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [hcloud_load_balancer.controlplane_load_balancer](https://registry.terraform.io/providers/hetznercloud/hcloud/1.48.1/docs/resources/load_balancer) | resource |
 | [hcloud_load_balancer_network.srvnetwork](https://registry.terraform.io/providers/hetznercloud/hcloud/1.48.1/docs/resources/load_balancer_network) | resource |
 | [hcloud_load_balancer_service.controlplane_load_balancer_service_kubectl](https://registry.terraform.io/providers/hetznercloud/hcloud/1.48.1/docs/resources/load_balancer_service) | resource |
@@ -42,7 +42,7 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | A name to provide for the Talos cluster | `string` | `"talos-hloud-cluster"` | no |
 | <a name="input_controlplane_ip"></a> [controlplane\_ip](#input\_controlplane\_ip) | n/a | `string` | `"10.0.0.3"` | no |
 | <a name="input_controlplane_type"></a> [controlplane\_type](#input\_controlplane\_type) | Control plane | `string` | `"cx32"` | no |
@@ -61,7 +61,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_kubeconfig"></a> [kubeconfig](#output\_kubeconfig) | n/a |
 | <a name="output_talosconfig"></a> [talosconfig](#output\_talosconfig) | n/a |
 <!-- END_TF_DOCS -->

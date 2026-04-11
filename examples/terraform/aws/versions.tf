@@ -17,6 +17,7 @@ provider "aws" {
       Project     = "Talos Kubernetes Cluster"
       Provisioner = "Terraform"
       Environment = "Testing"
+      ClusterName = var.cluster_name
     }
   }
 }

@@ -41,7 +41,7 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.3 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 3.0 |
 | <a name="requirement_talos"></a> [talos](#requirement\_talos) | 0.11.0-beta.1 |
@@ -49,14 +49,14 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.117.1 |
 | <a name="provider_talos"></a> [talos](#provider\_talos) | 0.11.0-beta.1 |
 
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_control_plane_sg"></a> [control\_plane\_sg](#module\_control\_plane\_sg) | Azure/network-security-group/azurerm | ~> 3.0 |
 | <a name="module_kubernetes_api_lb"></a> [kubernetes\_api\_lb](#module\_kubernetes\_api\_lb) | Azure/loadbalancer/azurerm | ~> 4.0 |
 | <a name="module_talos_control_plane_nodes"></a> [talos\_control\_plane\_nodes](#module\_talos\_control\_plane\_nodes) | Azure/compute/azurerm | ~> 5.0 |
@@ -66,7 +66,7 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [azurerm_network_interface_backend_address_pool_association.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_interface_backend_address_pool_association) | resource |
 | [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) | resource |
 | [talos_cluster_kubeconfig.this](https://registry.terraform.io/providers/siderolabs/talos/0.11.0-beta.1/docs/resources/cluster_kubeconfig) | resource |
@@ -82,7 +82,7 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_azure_location"></a> [azure\_location](#input\_azure\_location) | Azure location to use | `string` | `"West Europe"` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of cluster | `string` | `"talos-azure-example"` | no |
 | <a name="input_config_patch_files"></a> [config\_patch\_files](#input\_config\_patch\_files) | Path to talos config path files that applies to all nodes | `list(string)` | `[]` | no |
@@ -98,7 +98,7 @@ Getting the kubeconfig and talosconfig for this cluster can be done with `terraf
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_kubeconfig"></a> [kubeconfig](#output\_kubeconfig) | n/a |
 | <a name="output_talosconfig"></a> [talosconfig](#output\_talosconfig) | n/a |
 <!-- END_TF_DOCS -->

@@ -1,9 +1,7 @@
 locals {
   # Generate a safe cluster name limited to 32 characters
-  # Keep first 16 chars as-is, use SHA256 hash of remaining chars for last 16
-  # also trim trailing dashes
-  # This is to ensure compatibility with AWS resource naming restrictions
-  cluster_name_safe = length(var.cluster_name) <= 32 ? var.cluster_name : "${trimsuffix(substr(var.cluster_name, 0, 16), "-")}${substr(sha256(substr(var.cluster_name, 16, -1)), 0, 16)}"
+  # This is necessary because AWS resource names often have length restrictions, and using a UUID ensures uniqueness while avoiding issues with special characters.
+  cluster_name_safe = substr(uuidv5("oid", var.cluster_name), 0, 32)
 
   common_machine_config_patch = {
     machine = {
@@ -119,7 +117,7 @@ module "elb_k8s_elb" {
   source  = "terraform-aws-modules/elb/aws"
   version = "~> 4.0"
 
-  name    = trimsuffix(substr("${local.cluster_name_safe}-k8s-api", 0, 32), "-")
+  name    = local.cluster_name_safe
   subnets = module.vpc.public_subnets
   tags    = merge(var.extra_tags, local.cluster_required_tags)
   security_groups = [

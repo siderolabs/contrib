@@ -6,7 +6,7 @@ No requirements.
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_xenorchestra"></a> [xenorchestra](#provider\_xenorchestra) | 0.37.4 |
 
 ## Modules
@@ -16,7 +16,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [xenorchestra_vm.cp](https://registry.terraform.io/providers/vatesfr/xenorchestra/latest/docs/resources/vm) | resource |
 | [xenorchestra_vm.worker](https://registry.terraform.io/providers/vatesfr/xenorchestra/latest/docs/resources/vm) | resource |
 | [xenorchestra_network.net](https://registry.terraform.io/providers/vatesfr/xenorchestra/latest/docs/data-sources/network) | data source |
@@ -26,7 +26,7 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the Talos cluster | `string` | `"demo-talos"` | no |
 | <a name="input_cp_cpus"></a> [cp\_cpus](#input\_cp\_cpus) | Number of CPUs for control plane | `number` | `2` | no |
 | <a name="input_cp_disk_size_gb"></a> [cp\_disk\_size\_gb](#input\_cp\_disk\_size\_gb) | Control plane disk size in GB | `number` | `20` | no |
