@@ -7,7 +7,7 @@ No requirements.
 
 | Name | Version |
 | ---- | ------- |
-| <a name="provider_xenorchestra"></a> [xenorchestra](#provider\_xenorchestra) | 0.37.4 |
+| <a name="provider_xenorchestra"></a> [xenorchestra](#provider\_xenorchestra) | 0.38.0 |
 
 ## Modules
 
