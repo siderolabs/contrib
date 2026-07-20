@@ -1,0 +1,63 @@
+<!--
+  A single "bare metal server" VM.
+
+  Boot order is HDD first, then network: with an empty disk the UEFI firmware falls
+  through to PXE on the first boot. Once Talos is installed the machine boots from
+  disk, and the provider flips it back to a one-shot PXE boot over Redfish when it
+  needs to re-provision.
+
+  The domain UUID is what ties everything together: it is the SMBIOS UUID Talos
+  reports to Omni as the machine ID, and it is the Redfish System id that sushy
+  exposes for this domain.
+-->
+<domain type='kvm'>
+  <name>${VM_NAME}</name>
+  <uuid>${VM_UUID}</uuid>
+  <memory unit='MiB'>${VM_RAM_MB}</memory>
+  <currentMemory unit='MiB'>${VM_RAM_MB}</currentMemory>
+  <vcpu placement='static'>${VM_VCPUS}</vcpu>
+  <os>
+    <type arch='x86_64' machine='q35'>hvm</type>
+    <loader readonly='yes' type='pflash'>${OVMF_CODE}</loader>
+    <nvram template='${OVMF_VARS}'>${VM_NVRAM_PATH}</nvram>
+    <boot dev='hd'/>
+    <boot dev='network'/>
+    <bootmenu enable='no'/>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+  </features>
+  <cpu mode='host-passthrough' check='none' migratable='on'/>
+  <clock offset='utc'/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>destroy</on_crash>
+  <devices>
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2' cache='unsafe'/>
+      <source file='${VM_DISK_PATH}'/>
+      <target dev='vda' bus='virtio'/>
+    </disk>
+    <interface type='network'>
+      <source network='${LIBVIRT_NETWORK_NAME}'/>
+      <mac address='${VM_MAC}'/>
+      <model type='virtio'/>
+    </interface>
+    <serial type='file'>
+      <source path='${VM_SERIAL_LOG}'/>
+      <target type='isa-serial' port='0'>
+        <model name='isa-serial'/>
+      </target>
+    </serial>
+    <console type='file'>
+      <source path='${VM_SERIAL_LOG}'/>
+      <target type='serial' port='0'/>
+    </console>
+    <graphics type='vnc' port='-1' autoport='yes' listen='127.0.0.1'/>
+    <video>
+      <model type='virtio'/>
+    </video>
+    <memballoon model='virtio'/>
+  </devices>
+</domain>

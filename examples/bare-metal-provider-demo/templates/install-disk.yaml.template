@@ -1,0 +1,8 @@
+# Pin the Talos install disk for every machine in the cluster.
+#
+# Cluster-wide rather than per-machine: with a machine class, Omni decides which
+# machines join, so their IDs are not known at render time. All demo VMs are
+# identical (a single virtio disk), so one patch covers them.
+machine:
+  install:
+    disk: ${INSTALL_DISK}

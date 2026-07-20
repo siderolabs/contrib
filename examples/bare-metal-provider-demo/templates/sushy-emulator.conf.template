@@ -1,0 +1,42 @@
+# sushy-emulator config -- ONE INSTANCE PER VM.
+#
+# Why one per VM: the provider's Redfish client calls Service.Systems() and
+# unconditionally takes systems[0] (internal/provider/bmc/redfish/redfish.go,
+# getSystem()). A single emulator exposing every libvirt domain would therefore
+# let the provider power-manage only one of them. So each VM gets its own
+# emulator, filtered down to exactly one System via ALLOWED_INSTANCES.
+#
+# Why a distinct IP rather than a distinct port: the provider takes the Redfish
+# port from the global --redfish-port flag and discards any port in the
+# per-machine BMC address (redfish.NewClient splits host:port and keeps only the
+# host). All emulators therefore share one port and are told apart by IP.
+
+SUSHY_EMULATOR_LISTEN_IP = u'${SUSHY_IP}'
+SUSHY_EMULATOR_LISTEN_PORT = ${SUSHY_PORT}
+
+# Plain HTTP -- the provider is run with --redfish-use-https=false.
+SUSHY_EMULATOR_SSL_CERT = None
+SUSHY_EMULATOR_SSL_KEY = None
+
+SUSHY_EMULATOR_OS_CLOUD = None
+SUSHY_EMULATOR_LIBVIRT_URI = u'qemu:///system'
+
+# Honour boot device overrides -- the provider relies on SetBoot(Pxe, Once).
+SUSHY_EMULATOR_IGNORE_BOOT_DEVICE = False
+
+# The libvirt driver identifies systems by domain UUID.
+SUSHY_EMULATOR_ALLOWED_INSTANCES = [u'${VM_UUID}']
+
+# The provider sends BootSourceOverrideMode=UEFI (--ipmi-pxe-boot-mode defaults
+# to uefi, --redfish-set-boot-source-override-mode defaults to true), which makes
+# sushy rewrite the domain's loader from this map. Must match the loader in
+# vm.xml.template, and must be the non-secboot build: the provider is not run
+# with --secure-boot-enabled.
+SUSHY_EMULATOR_BOOT_LOADER_MAP = {
+    u'UEFI': {
+        u'x86_64': u'${OVMF_CODE}'
+    },
+    u'Legacy': {
+        u'x86_64': None
+    }
+}

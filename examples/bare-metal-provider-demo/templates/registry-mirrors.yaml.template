@@ -1,0 +1,44 @@
+# Talos machine config patch pointing every registry at the local pull-through
+# caches from docker-compose.yaml.
+#
+# Applied as a `file:` patch by the cluster template. Ports match the compose
+# services one-for-one; the host is the libvirt gateway, which is the VMs'
+# default route.
+#
+# Plain http:// is intentional -- these are local caches on an isolated NAT
+# network with no TLS.
+apiVersion: v1alpha1
+kind: RegistryMirrorConfig
+name: docker.io
+endpoints:
+  - url: http://${REGISTRY_BIND_IP}:5000
+---
+apiVersion: v1alpha1
+kind: RegistryMirrorConfig
+name: registry.k8s.io
+endpoints:
+  - url: http://${REGISTRY_BIND_IP}:5001
+---
+apiVersion: v1alpha1
+kind: RegistryMirrorConfig
+name: gcr.io
+endpoints:
+  - url: http://${REGISTRY_BIND_IP}:5003
+---
+apiVersion: v1alpha1
+kind: RegistryMirrorConfig
+name: ghcr.io
+endpoints:
+  - url: http://${REGISTRY_BIND_IP}:5004
+---
+apiVersion: v1alpha1
+kind: RegistryMirrorConfig
+name: factory.talos.dev
+endpoints:
+  - url: http://${REGISTRY_BIND_IP}:5005
+---
+apiVersion: v1alpha1
+kind: RegistryMirrorConfig
+name: quay.io
+endpoints:
+  - url: http://${REGISTRY_BIND_IP}:5006

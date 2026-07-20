@@ -1,0 +1,32 @@
+# Points the provider at this machine's sushy emulator.
+#
+# This is the *user-facing* resource. Do not target BMCConfigs.omni.sidero.dev
+# directly -- Omni rejects that with "users are not allowed to modify". It is
+# generated from this one by BMCConfigController, which copies this spec into
+# infra.BMCConfig and labels it with the provider ID taken from the machine's
+# siderolink Link.
+#
+# From there the provider prefers a user-supplied BMCConfig over anything the
+# Talos agent discovers on its own (bmc_configuration.go, storeUserProvidedBMCConfig).
+# The address lands in the BMCConfiguration's `ipmi` field, which is also what the
+# Redfish client reads -- with --redfish-use-always the provider talks Redfish to
+# this address and never touches IPMI. That is what stops the agent's
+# "ipmi dev file not opened" error, which VMs hit because they have no real BMC.
+#
+# The resource id is the machine id as Omni knows it, which is the id of the
+# machine's Link -- the SMBIOS UUID Talos reports, i.e. the libvirt domain UUID.
+#
+# Ordering: the provider only consumes this once the machine's agent is already
+# accessible, so a machine must PXE boot into agent mode before this takes effect.
+metadata:
+  namespace: default
+  type: InfraMachineBMCConfigs.omni.sidero.dev
+  id: ${VM_UUID}
+spec:
+  ipmi:
+    address: ${SUSHY_IP}
+    # Ignored on the Redfish path (--redfish-port wins), recorded for clarity.
+    port: ${SUSHY_PORT}
+    # sushy-emulator runs without an auth file, so it accepts any credentials.
+    username: ${SUSHY_USERNAME}
+    password: ${SUSHY_PASSWORD}

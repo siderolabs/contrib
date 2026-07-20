@@ -1,0 +1,13 @@
+# Machine class the cluster template allocates from.
+#
+# Matches every machine registered to this demo's infra provider, so all VMs
+# land in one pool and Omni picks which ones join the cluster. Applied with
+# `omnictl apply` (a MachineClass is a plain Omni resource, not part of the
+# cluster template) before the template is synced.
+metadata:
+  namespace: default
+  type: MachineClasses.omni.sidero.dev
+  id: ${MACHINE_CLASS_NAME}
+spec:
+  matchlabels:
+    - ${MACHINE_SELECTOR}

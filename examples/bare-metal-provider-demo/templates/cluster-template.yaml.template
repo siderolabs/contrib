@@ -1,0 +1,61 @@
+# Omni cluster template for the demo machines.
+#
+#   task cluster-template   # render only, to _out/rendered/cluster-template.yaml
+#   task cluster-up         # render + omnictl cluster template sync
+#   task cluster-status
+#   task cluster-down
+#
+# Machines are allocated from a machine class (templates/machine-class.yaml.template)
+# rather than listed by ID: the class matches every machine registered to this
+# demo's provider, and Omni picks which ones join. That leaves spare machines in
+# the pool, so scaling is a size bump here rather than an edit to a machine list.
+#
+# Allocating a machine to a cluster is what powers it on: it sets
+# ClusterTalosVersion, which makes RequiresPowerOn() true in the provider, which
+# sets a one-shot PXE boot over Redfish and powers the machine up.
+kind: Cluster
+name: ${CLUSTER_NAME}
+kubernetes:
+  version: ${KUBERNETES_VERSION}
+talos:
+  version: ${TALOS_VERSION}
+patches:
+  # `file:` paths resolve relative to this template's directory; all of these are
+  # rendered into _out/rendered/ together.
+  #
+  # Point every registry at the local pull-through caches (docker-compose.yaml).
+  - name: registry-mirrors
+    file: registry-mirrors.yaml
+  # Pin the install disk (was a per-machine doc before the machine class).
+  - name: install-disk
+    file: install-disk.yaml
+  # WireGuard mesh between all nodes. Inline rather than a `file:` patch so it is
+  # visible here -- it is a demo of the feature, not a requirement: these VMs all
+  # sit on one libvirt network and would route fine without it.
+  - name: kubespan-enabled
+    inline:
+      machine:
+        network:
+          kubespan:
+            enabled: true
+---
+kind: ControlPlane
+machineClass:
+  name: ${MACHINE_CLASS_NAME}
+  size: ${CONTROL_PLANE_SIZE}
+---
+kind: Workers
+machineClass:
+  name: ${MACHINE_CLASS_NAME}
+  size: ${WORKER_SIZE}
+# Roll config changes and upgrades 4 machines at a time instead of the default 1.
+# `type` defaults to `Rolling` for both, so only maxParallelism needs setting.
+#
+# Deliberately not set on ControlPlane: Omni does not expose these fields there,
+# and etcd tolerates only one member down at a time anyway.
+updateStrategy:
+  rolling:
+    maxParallelism: 4
+upgradeStrategy:
+  rolling:
+    maxParallelism: 4

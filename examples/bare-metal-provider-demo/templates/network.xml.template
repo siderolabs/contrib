@@ -1,0 +1,26 @@
+<!--
+  libvirt network for the bare metal provider demo.
+
+  The provider does NOT run its own DHCP proxy here (see the disable-dhcp-proxy
+  flag in the Taskfile), because libvirt's dnsmasq already owns port 67 on this
+  bridge. Instead dnsmasq hands out the PXE boot file directly via bootp:
+  the VM firmware TFTPs snp.efi from the provider, and that binary is pre-patched
+  by the provider with an embedded iPXE script pointing back at its own HTTP endpoint.
+-->
+<network>
+  <name>${LIBVIRT_NETWORK_NAME}</name>
+  <forward mode='nat'>
+    <nat>
+      <port start='1024' end='65535'/>
+    </nat>
+  </forward>
+  <bridge name='${LIBVIRT_BRIDGE_IFACE_NAME}' stp='off' delay='0'/>
+  <ip address='${LIBVIRT_SUBNET_ROUTER}' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='${LIBVIRT_SUBNET_PREFIX}.150' end='${LIBVIRT_SUBNET_PREFIX}.199'/>
+${DHCP_HOST_ENTRIES}
+      <!-- served by the provider's TFTP server on port 69 -->
+      <bootp file='snp.efi' server='${PROVIDER_IP}'/>
+    </dhcp>
+  </ip>
+</network>

@@ -1,0 +1,106 @@
+# Pull-through registry caches for the demo cluster.
+#
+# Avoids Docker Hub rate limiting and cuts upstream bandwidth when ten machines
+# all pull the same images. Adapted from https://github.com/fsgh42/talos-proxies.
+#
+# Each registry is bound to the libvirt gateway IP rather than 0.0.0.0, so it is
+# reachable from the demo VMs (whose default route is that address) without being
+# exposed on every host interface. The bridge must therefore already exist:
+# `task registries-up` runs after `task net-up`, and `task up` orders them for you.
+#
+# REGISTRY_BIND_IP is exported by the Taskfile and is mandatory here. It has no
+# default on purpose: unset, compose would bind 0.0.0.0 and publish every cache
+# on every host interface, which both leaks them and collides with anything else
+# holding those ports. Start these via `task registries:up`, not a bare
+# `docker compose up -d`.
+#
+# The matching Talos RegistryMirrorConfig patch is rendered from
+# templates/registry-mirrors.yaml.template and applied by the cluster template.
+
+# Each cache keeps its blobs in a named volume mounted at /var/lib/registry
+# (registry:3's default storage root). Without one the cache lives in the
+# container's writable layer and is lost whenever the container is replaced --
+# including `task infra:down`. `docker compose down` does not remove named
+# volumes, so the cache survives a full teardown and rebuild; use
+# `task registries:purge` to drop it deliberately.
+
+x-registry: &registry
+  image: registry:3
+  restart: always
+  environment: &registry-env
+    REGISTRY_LOG_LEVEL: info
+
+services:
+  registry-docker-io:
+    <<: *registry
+    container_name: bmp-registry-docker.io
+    ports:
+      - "${REGISTRY_BIND_IP:?must be set; run via `task registries:up`}:5000:5000"
+    volumes:
+      - registry-docker-io:/var/lib/registry
+    environment:
+      <<: *registry-env
+      REGISTRY_PROXY_REMOTEURL: https://registry-1.docker.io
+
+  registry-k8s-io:
+    <<: *registry
+    container_name: bmp-registry-registry.k8s.io
+    ports:
+      - "${REGISTRY_BIND_IP:?must be set; run via `task registries:up`}:5001:5000"
+    volumes:
+      - registry-k8s-io:/var/lib/registry
+    environment:
+      <<: *registry-env
+      REGISTRY_PROXY_REMOTEURL: https://registry.k8s.io
+
+  registry-gcr-io:
+    <<: *registry
+    container_name: bmp-registry-gcr.io
+    ports:
+      - "${REGISTRY_BIND_IP:?must be set; run via `task registries:up`}:5003:5000"
+    volumes:
+      - registry-gcr-io:/var/lib/registry
+    environment:
+      <<: *registry-env
+      REGISTRY_PROXY_REMOTEURL: https://gcr.io
+
+  registry-ghcr-io:
+    <<: *registry
+    container_name: bmp-registry-ghcr.io
+    ports:
+      - "${REGISTRY_BIND_IP:?must be set; run via `task registries:up`}:5004:5000"
+    volumes:
+      - registry-ghcr-io:/var/lib/registry
+    environment:
+      <<: *registry-env
+      REGISTRY_PROXY_REMOTEURL: https://ghcr.io
+
+  factory-talos-dev:
+    <<: *registry
+    container_name: bmp-factory-talos-dev
+    ports:
+      - "${REGISTRY_BIND_IP:?must be set; run via `task registries:up`}:5005:5000"
+    volumes:
+      - factory-talos-dev:/var/lib/registry
+    environment:
+      <<: *registry-env
+      REGISTRY_PROXY_REMOTEURL: https://factory.talos.dev
+
+  registry-quay-io:
+    <<: *registry
+    container_name: bmp-registry-quay.io
+    ports:
+      - "${REGISTRY_BIND_IP:?must be set; run via `task registries:up`}:5006:5000"
+    volumes:
+      - registry-quay-io:/var/lib/registry
+    environment:
+      <<: *registry-env
+      REGISTRY_PROXY_REMOTEURL: https://quay.io
+
+volumes:
+  registry-docker-io:
+  registry-k8s-io:
+  registry-gcr-io:
+  registry-ghcr-io:
+  factory-talos-dev:
+  registry-quay-io:

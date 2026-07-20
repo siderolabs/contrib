@@ -1,0 +1,573 @@
+version: '3'
+
+vars:
+  OUT_DIR: '_out'
+  RENDER_DIR: '{{ .OUT_DIR }}/rendered'
+
+  PROVIDER_TAG: v0.10.2
+  PROVIDER_IMAGE: 'ghcr.io/siderolabs/omni-infra-provider-bare-metal:{{ .PROVIDER_TAG }}'
+  PROVIDER_CONTAINER: omni-infra-provider-bare-metal-demo
+  PROVIDER_CREDENTIALS_FILE: '{{ .OUT_DIR }}/omni-creds.sh'
+  # Must match the ID the service account in PROVIDER_CREDENTIALS_FILE was created
+  # for -- Omni rejects the connection if they differ. Change both together, and
+  # delete the credentials file to have it recreated.
+  PROVIDER_ID: bare-metal-demo
+  MACHINE_SELECTOR: 'omni.sidero.dev/infra-provider-id={{ .PROVIDER_ID }}'
+  # Deleting a Link waits on finalizer removal, which needs a converging
+  # provider. Bounded so `down` always completes the local teardown.
+  MACHINE_DELETE_TIMEOUT: 60s
+
+  SUSHY_TAG: latest
+  SUSHY_IMAGE: 'quay.io/metal3-io/sushy-tools:{{ .SUSHY_TAG }}'
+  SUSHY_CONTAINER_PREFIX: sushy-bmp
+  # One shared port for all emulators: the provider takes the Redfish port from
+  # --redfish-port and ignores any port in the per-machine BMC address.
+  SUSHY_PORT: '8000'
+  # sushy runs without an auth file, so these are accepted as-is.
+  SUSHY_USERNAME: admin
+  SUSHY_PASSWORD: password
+
+  LIBVIRT_NETWORK_NAME: 'bmp0'
+  LIBVIRT_BRIDGE_IFACE_NAME: 'br-bmp0'
+  LIBVIRT_SUBNET_PREFIX: '192.168.234'
+  LIBVIRT_SUBNET: '{{ .LIBVIRT_SUBNET_PREFIX }}.0/24'
+  LIBVIRT_SUBNET_ROUTER: '{{ .LIBVIRT_SUBNET_PREFIX }}.1'
+  # The provider runs with --network host and serves TFTP/HTTP/gRPC on the
+  # bridge address itself, so this is the bridge IP rather than a separate alias.
+  PROVIDER_IP: '{{ .LIBVIRT_SUBNET_ROUTER }}'
+
+  LIBVIRT_IMAGES_DIR: /var/lib/libvirt/images
+  LIBVIRT_NVRAM_DIR: /var/lib/libvirt/qemu/nvram
+  VM_SERIAL_LOG_DIR: /var/log/libvirt/qemu
+
+  # Size of the machine pool. The cluster allocates CONTROL_PLANE_SIZE +
+  # WORKER_SIZE of these; the remainder stay registered but unallocated.
+  VM_COUNT: '10'
+  VM_NAME_PREFIX: bmp-node
+  VM_DISK_SIZE: 20G
+  VM_RAM_MB: '4096'
+  VM_VCPUS: '2'
+
+  # Arch paths. Debian/Ubuntu: /usr/share/OVMF/OVMF_CODE_4M.fd + OVMF_VARS_4M.fd
+  OVMF_DIR: /usr/share/edk2/x64
+  OVMF_CODE: '{{ .OVMF_DIR }}/OVMF_CODE.4m.fd'
+  OVMF_VARS: '{{ .OVMF_DIR }}/OVMF_VARS.4m.fd'
+
+  # Registries bind to the libvirt gateway: reachable from the VMs (it is their
+  # default route) without being exposed on every host interface.
+  REGISTRY_BIND_IP: '{{ .LIBVIRT_SUBNET_ROUTER }}'
+
+  CLUSTER_NAME: bare-metal-demo
+  CLUSTER_TEMPLATE: '{{ .RENDER_DIR }}/cluster-template.yaml'
+  MACHINE_CLASS_NAME: bare-metal-demo
+  MACHINE_CLASS_TEMPLATE: '{{ .RENDER_DIR }}/machine-class.yaml'
+  # Bump either and re-run `task cluster:up` to scale: Omni allocates the
+  # difference from the machine class pool. Total must stay <= VM_COUNT.
+  CONTROL_PLANE_SIZE: '1'
+  WORKER_SIZE: '6'
+  KUBECONFIG_FILE: '{{ .OUT_DIR }}/kubeconfig.yaml'
+  # Omni's own defaults (client/pkg/constants, internal/pkg/constants).
+  TALOS_VERSION: v1.13.3
+  KUBERNETES_VERSION: v1.36.1
+  # virtio disk from vm.xml.template
+  INSTALL_DISK: /dev/vda
+
+  # Set VIRSH="sudo virsh -c qemu:///system" if you are not in the libvirt group.
+  VIRSH: 'virsh -c qemu:///system'
+
+  # Shared by provider-run (foreground) and provider-start (detached) so the two
+  # cannot drift apart. Must stay LAST in this block: Task evaluates vars in
+  # declaration order, so referencing PROVIDER_IP/SUSHY_PORT any earlier renders
+  # them empty.
+  #
+  # --disable-dhcp-proxy: libvirt's dnsmasq already owns port 67 on this bridge
+  #   and hands out the boot file itself via <bootp> (see network.xml.template).
+  #   The provider still serves the patched snp.efi over TFTP and the iPXE script
+  #   over HTTP.
+  # --redfish-use-always: power management goes to sushy, not IPMI. This is why
+  #   there is no --agent-test-mode/--api-power-mgmt-state-dir here: those select
+  #   the QEMU HTTP power API, which takes priority over Redfish.
+  PROVIDER_ARGS: >-
+    --id={{ .PROVIDER_ID }}
+    --insecure-skip-tls-verify
+    --api-advertise-address={{ .PROVIDER_IP }}
+    --disable-dhcp-proxy
+    --redfish-use-always
+    --redfish-port={{ .SUSHY_PORT }}
+    --redfish-use-https=false
+    --redfish-insecure-skip-tls-verify
+    --ipmi-pxe-boot-mode=uefi
+    --debug
+
+env:
+  RENDER_DIR: '{{ .RENDER_DIR }}'
+  LIBVIRT_NETWORK_NAME: '{{ .LIBVIRT_NETWORK_NAME }}'
+  LIBVIRT_BRIDGE_IFACE_NAME: '{{ .LIBVIRT_BRIDGE_IFACE_NAME }}'
+  LIBVIRT_SUBNET_PREFIX: '{{ .LIBVIRT_SUBNET_PREFIX }}'
+  LIBVIRT_SUBNET_ROUTER: '{{ .LIBVIRT_SUBNET_ROUTER }}'
+  PROVIDER_IP: '{{ .PROVIDER_IP }}'
+  LIBVIRT_IMAGES_DIR: '{{ .LIBVIRT_IMAGES_DIR }}'
+  LIBVIRT_NVRAM_DIR: '{{ .LIBVIRT_NVRAM_DIR }}'
+  VM_SERIAL_LOG_DIR: '{{ .VM_SERIAL_LOG_DIR }}'
+  VM_NAME_PREFIX: '{{ .VM_NAME_PREFIX }}'
+  VM_RAM_MB: '{{ .VM_RAM_MB }}'
+  VM_VCPUS: '{{ .VM_VCPUS }}'
+  OVMF_CODE: '{{ .OVMF_CODE }}'
+  OVMF_VARS: '{{ .OVMF_VARS }}'
+  SUSHY_CONTAINER_PREFIX: '{{ .SUSHY_CONTAINER_PREFIX }}'
+  SUSHY_PORT: '{{ .SUSHY_PORT }}'
+  SUSHY_USERNAME: '{{ .SUSHY_USERNAME }}'
+  SUSHY_PASSWORD: '{{ .SUSHY_PASSWORD }}'
+  # Consumed by docker-compose.yaml and registry-mirrors.yaml.template.
+  REGISTRY_BIND_IP: '{{ .REGISTRY_BIND_IP }}'
+
+tasks:
+
+  default:
+    cmds:
+      - task --list
+
+  # ---------------------------------------------------------------- lifecycle
+
+  "infra:up":
+    desc: Bring up the whole demo (network, emulators, provider, VMs)
+    cmds:
+      - task: net:up
+      - task: net:bridge-ips
+      # After net-up: the registries bind to the bridge's gateway IP.
+      - task: registries:up
+      - task: vms:create
+      - task: sushy:up
+      # Before vms-up: the provider serves the TFTP/iPXE assets the VMs fetch on
+      # their very first boot, so it has to be listening before they power on.
+      - task: provider:start
+      - task: vms:up
+      - |
+        echo
+        echo "Everything is up. Next:"
+        echo "  task provider:logs     # watch it serve iPXE and talk Redfish"
+        echo "  task machines:bmc-configure     # once machines show up in Omni as agents"
+
+  "infra:down":
+    desc: Tear everything down
+    cmds:
+      # Before provider-stop: the provider is what services the machines'
+      # teardown, so it wants to still be running while they go away.
+      - task: machines:delete
+      - task: provider:stop
+      - task: provider:delete
+      - task: sushy:down
+      - task: registries:down
+      - task: vms:destroy
+      - task: net:bridge-ips-remove
+      - task: net:down
+
+  # ------------------------------------------------------------------ network
+
+  "net:up":
+    desc: Define and start the libvirt network
+    cmds:
+      - mkdir -p {{ .RENDER_DIR }}
+      - |
+        set -eu
+        # Per-VM DHCP reservations, so each machine has a stable address.
+        entries=""
+        for i in $(seq 1 {{ .VM_COUNT }}); do
+          . ./scripts/vm-env.sh "$i"
+          entries="${entries}      <host mac='${VM_MAC}' name='${VM_NAME}' ip='${VM_IP}'/>
+        "
+        done
+        # strip the trailing newline so the rendered XML stays tidy
+        DHCP_HOST_ENTRIES="$(printf '%s' "${entries}")" \
+          envsubst < templates/network.xml.template > {{ .RENDER_DIR }}/network.xml
+      - '{{ .VIRSH }} net-define {{ .RENDER_DIR }}/network.xml'
+      - '{{ .VIRSH }} net-start {{ .LIBVIRT_NETWORK_NAME }}'
+      - '{{ .VIRSH }} net-autostart {{ .LIBVIRT_NETWORK_NAME }} --disable || true'
+
+  "net:down":
+    desc: Stop and undefine the libvirt network
+    cmds:
+      - '{{ .VIRSH }} net-destroy {{ .LIBVIRT_NETWORK_NAME }} || true'
+      - '{{ .VIRSH }} net-undefine {{ .LIBVIRT_NETWORK_NAME }} || true'
+
+  "net:bridge-ips":
+    desc: Add the per-emulator IP aliases to the bridge
+    cmds:
+      - |
+        set -eu
+        # Each sushy emulator needs its own address (see sushy-emulator.conf.template
+        # for why they cannot simply share one on different ports).
+        for i in $(seq 1 {{ .VM_COUNT }}); do
+          . ./scripts/vm-env.sh "$i"
+          sudo ip addr add "${SUSHY_IP}/24" dev {{ .LIBVIRT_BRIDGE_IFACE_NAME }} 2>/dev/null || true
+          echo "bridge alias ${SUSHY_IP} -> {{ .LIBVIRT_BRIDGE_IFACE_NAME }}"
+        done
+
+  "net:bridge-ips-remove":
+    cmds:
+      - |
+        set -eu
+        for i in $(seq 1 {{ .VM_COUNT }}); do
+          . ./scripts/vm-env.sh "$i"
+          sudo ip addr del "${SUSHY_IP}/24" dev {{ .LIBVIRT_BRIDGE_IFACE_NAME }} 2>/dev/null || true
+        done
+
+  # ----------------------------------------------------------------- provider
+
+  "provider:pull":
+    cmds:
+      - docker pull {{ .PROVIDER_IMAGE }}
+    status:
+      - docker image inspect {{ .PROVIDER_IMAGE }} >/dev/null 2>&1
+
+  "provider:credentials":
+    desc: Create the infra provider in Omni and save its service account credentials
+    generates:
+      - '{{ .PROVIDER_CREDENTIALS_FILE }}'
+    requires:
+      vars: [OMNICONFIG]
+    cmds:
+      - mkdir -p {{ .OUT_DIR }}
+      - omnictl infraprovider create {{ .PROVIDER_ID }} | grep -E '^OMNI_.*' > {{ .PROVIDER_CREDENTIALS_FILE }}
+    status:
+      - test -s {{ .PROVIDER_CREDENTIALS_FILE }}
+
+  "provider:run":
+    desc: Run the provider in the foreground (Ctrl-C to stop) -- good for watching the log
+    deps: [provider:pull, provider:credentials]
+    cmds:
+      - docker rm -f {{ .PROVIDER_CONTAINER }} >/dev/null 2>&1 || true
+      - >-
+        docker run
+        --rm -it
+        --name={{ .PROVIDER_CONTAINER }}
+        --network host
+        --env-file {{ .PROVIDER_CREDENTIALS_FILE }}
+        {{ .PROVIDER_IMAGE }}
+        {{ .PROVIDER_ARGS }}
+
+  "provider:start":
+    desc: Start the provider detached (used by `up`)
+    deps: [provider:pull, provider:credentials]
+    cmds:
+      - docker rm -f {{ .PROVIDER_CONTAINER }} >/dev/null 2>&1 || true
+      - >-
+        docker run
+        -d --restart unless-stopped
+        --name={{ .PROVIDER_CONTAINER }}
+        --network host
+        --env-file {{ .PROVIDER_CREDENTIALS_FILE }}
+        {{ .PROVIDER_IMAGE }}
+        {{ .PROVIDER_ARGS }}
+      - echo "provider running as {{ .PROVIDER_CONTAINER }} on {{ .PROVIDER_IP }} -- 'task provider:logs' to follow"
+
+  "provider:logs":
+    desc: Follow the provider log
+    cmds:
+      - docker logs -f {{ .PROVIDER_CONTAINER }}
+
+  "provider:stop":
+    cmds:
+      - docker rm -f {{ .PROVIDER_CONTAINER }} >/dev/null 2>&1 || true
+
+  "machines:delete":
+    desc: Remove this provider's machines from Omni
+    cmds:
+      # `omnictl delete` takes the same -l selector as `get`, so this needs no
+      # get|yq|xargs pipeline. The label is set on the siderolink Link and copied
+      # from there onto the Machine, so it selects correctly on either type.
+      #
+      # Deleting `link` rather than `machine`: `omnictl delete machine` does not
+      # currently take effect for these; removing the Link is the working path.
+      # Never fail the task: `down` must always reach provider-stop and
+      # provider-delete, even if machine removal misbehaves.
+      - ignore_error: true
+        cmd: |
+          set -eu
+
+          # Every omnictl call here is bounded: nothing in this task may stall
+          # `down` before the provider gets removed.
+          ids="$(timeout {{ .MACHINE_DELETE_TIMEOUT }} omnictl get link -l '{{ .MACHINE_SELECTOR }}' -o jsonpath='{.metadata.id}' 2>/dev/null || true)"
+
+          if [ -z "${ids}" ]; then
+            echo "no machines registered to {{ .PROVIDER_ID }}, nothing to delete"
+            exit 0
+          fi
+
+          echo "removing machines registered to {{ .PROVIDER_ID }}:"
+          echo "${ids}"
+
+          # Deletion blocks until finalizers are cleared, and the provider is what
+          # clears them -- so a machine whose provider never converges would wedge
+          # `down` indefinitely. Cap it and carry on with the local teardown.
+          if ! timeout {{ .MACHINE_DELETE_TIMEOUT }} omnictl delete link -l '{{ .MACHINE_SELECTOR }}'; then
+            echo
+            echo "WARNING: link deletion timed out or failed. Leftovers:"
+            timeout {{ .MACHINE_DELETE_TIMEOUT }} omnictl get link -l '{{ .MACHINE_SELECTOR }}' || true
+          fi
+
+  "provider:delete":
+    desc: Delete the infra provider from Omni and drop its stale credentials
+    cmds:
+      # Best-effort and bounded: `down` must still work with no OMNICONFIG, or
+      # against an Omni instance where the provider was already removed by hand.
+      # This is a TeardownAndDestroy too, so it can block on finalizers.
+      - |
+        set -eu
+        if ! timeout {{ .MACHINE_DELETE_TIMEOUT }} omnictl infraprovider delete {{ .PROVIDER_ID }}; then
+          echo "WARNING: could not delete infra provider {{ .PROVIDER_ID }} from Omni -- remove it by hand"
+        fi
+      # The credentials are scoped to the provider we just deleted, so they are
+      # now dead. Removing the file lets provider-credentials regenerate them
+      # on the next `up` -- its status check skips regeneration otherwise.
+      - rm -f {{ .PROVIDER_CREDENTIALS_FILE }}
+
+  # -------------------------------------------------------------------- sushy
+
+  "sushy:pull":
+    cmds:
+      - docker pull {{ .SUSHY_IMAGE }}
+    status:
+      - docker image inspect {{ .SUSHY_IMAGE }} >/dev/null 2>&1
+
+  "sushy:up":
+    desc: Start one sushy-emulator per VM (one Redfish System each)
+    deps: [sushy:pull]
+    cmds:
+      - mkdir -p {{ .RENDER_DIR }}
+      - |
+        set -eu
+        for i in $(seq 1 {{ .VM_COUNT }}); do
+          . ./scripts/vm-env.sh "$i"
+          envsubst < templates/sushy-emulator.conf.template > "${SUSHY_CONF}"
+
+          docker rm -f "${SUSHY_CONTAINER}" >/dev/null 2>&1 || true
+          docker run -d --restart unless-stopped \
+            --name "${SUSHY_CONTAINER}" \
+            --network host \
+            -v /var/run/libvirt:/var/run/libvirt \
+            -v "$(realpath "${SUSHY_CONF}")":/etc/sushy/sushy-emulator.conf:ro \
+            -v {{ .OVMF_DIR }}:{{ .OVMF_DIR }}:ro \
+            -e SUSHY_EMULATOR_CONFIG=/etc/sushy/sushy-emulator.conf \
+            {{ .SUSHY_IMAGE }} sushy-emulator >/dev/null
+
+          echo "${SUSHY_CONTAINER} -> http://${SUSHY_IP}:{{ .SUSHY_PORT }}/redfish/v1/Systems/${VM_UUID}"
+        done
+
+  "sushy:down":
+    cmds:
+      - |
+        set -eu
+        for i in $(seq 1 {{ .VM_COUNT }}); do
+          . ./scripts/vm-env.sh "$i"
+          docker rm -f "${SUSHY_CONTAINER}" >/dev/null 2>&1 || true
+        done
+
+  "sushy:check":
+    desc: Verify each emulator exposes exactly its own VM as Redfish System
+    cmds:
+      - |
+        set -eu
+        for i in $(seq 1 {{ .VM_COUNT }}); do
+          . ./scripts/vm-env.sh "$i"
+          echo "== ${SUSHY_CONTAINER} (${SUSHY_IP})"
+          curl -sS -u "{{ .SUSHY_USERNAME }}:{{ .SUSHY_PASSWORD }}" \
+            "http://${SUSHY_IP}:{{ .SUSHY_PORT }}/redfish/v1/Systems" || echo "  unreachable"
+          echo
+        done
+
+  # ---------------------------------------------------------------------- VMs
+
+  "vms:create":
+    desc: Create disks and define the VMs
+    cmds:
+      - mkdir -p {{ .RENDER_DIR }}
+      - sudo mkdir -p {{ .LIBVIRT_IMAGES_DIR }} {{ .LIBVIRT_NVRAM_DIR }} {{ .VM_SERIAL_LOG_DIR }}
+      - |
+        set -eu
+        for i in $(seq 1 {{ .VM_COUNT }}); do
+          . ./scripts/vm-env.sh "$i"
+
+          # Empty disk: the UEFI firmware finds nothing on `hd` and falls through
+          # to `network`, which is how a machine first reaches the provider.
+          sudo qemu-img create -f qcow2 "${VM_DISK_PATH}" {{ .VM_DISK_SIZE }} >/dev/null
+
+          envsubst < templates/vm.xml.template > "{{ .RENDER_DIR }}/${VM_NAME}.xml"
+          {{ .VIRSH }} define "{{ .RENDER_DIR }}/${VM_NAME}.xml"
+        done
+
+  "vms:up":
+    desc: Start the VMs
+    cmds:
+      - |
+        set -eu
+        for i in $(seq 1 {{ .VM_COUNT }}); do
+          . ./scripts/vm-env.sh "$i"
+          {{ .VIRSH }} start "${VM_NAME}" || true
+        done
+
+  "vms:down":
+    desc: Power off the VMs
+    cmds:
+      - |
+        set -eu
+        for i in $(seq 1 {{ .VM_COUNT }}); do
+          . ./scripts/vm-env.sh "$i"
+          {{ .VIRSH }} destroy "${VM_NAME}" || true
+        done
+
+  "vms:destroy":
+    desc: Power off, undefine and delete the VMs and their disks
+    cmds:
+      - |
+        set -eu
+        for i in $(seq 1 {{ .VM_COUNT }}); do
+          . ./scripts/vm-env.sh "$i"
+          {{ .VIRSH }} destroy "${VM_NAME}" 2>/dev/null || true
+          {{ .VIRSH }} undefine "${VM_NAME}" --nvram --remove-all-storage 2>/dev/null || true
+          sudo rm -f "${VM_DISK_PATH}" "${VM_NVRAM_PATH}"
+        done
+
+  "vms:console":
+    desc: 'Tail a VM serial log (usage: task vms:console -- 1)'
+    cmds:
+      - |
+        set -eu
+        . ./scripts/vm-env.sh "{{ default 1 .CLI_ARGS }}"
+        sudo tail -f "${VM_SERIAL_LOG}"
+
+  # ------------------------------------------------------------- omni wiring
+
+  "machines:bmc-configure":
+    desc: Point the provider at each VM's sushy emulator (run once agents are up)
+    requires:
+      vars: [OMNICONFIG]
+    cmds:
+      - mkdir -p {{ .RENDER_DIR }}
+      - |
+        set -eu
+        for i in $(seq 1 {{ .VM_COUNT }}); do
+          . ./scripts/vm-env.sh "$i"
+          envsubst < templates/bmc-config.yaml.template > "{{ .RENDER_DIR }}/bmc-${VM_NAME}.yaml"
+          omnictl apply -f "{{ .RENDER_DIR }}/bmc-${VM_NAME}.yaml"
+        done
+
+  # --------------------------------------------------------------- registries
+
+  "registries:up":
+    desc: Start the local pull-through registry caches
+    cmds:
+      # Binds to the libvirt gateway IP, so the bridge must already exist.
+      - docker compose up -d
+      - |
+        set -eu
+        echo "registries on {{ .REGISTRY_BIND_IP }}:"
+        docker compose ps --format '  {{`{{.Name}}`}} {{`{{.Publishers}}`}}' 2>/dev/null || docker compose ps
+
+  "registries:down":
+    cmds:
+      # No -v: the cached blobs outlive a teardown, so the next `infra:up` does
+      # not re-pull everything. `registries:purge` drops them.
+      - docker compose down --remove-orphans || true
+
+  "registries:purge":
+    desc: Stop the caches and delete their cached blobs
+    cmds:
+      - docker compose down --remove-orphans --volumes || true
+
+  "registries:check":
+    desc: Verify each cache answers on the gateway IP
+    cmds:
+      - |
+        set -eu
+        for port in 5000 5001 5003 5004 5005 5006; do
+          printf '%s:%s ' '{{ .REGISTRY_BIND_IP }}' "${port}"
+          curl -sf -o /dev/null -w '%{http_code}\n' \
+            "http://{{ .REGISTRY_BIND_IP }}:${port}/v2/" || echo "UNREACHABLE"
+        done
+
+  # ------------------------------------------------------------------ cluster
+
+  "cluster:template":
+    desc: Render the Omni cluster template
+    cmds:
+      - mkdir -p {{ .RENDER_DIR }}
+      - |
+        set -eu
+
+        # No per-machine rendering: the machine class selects machines by label,
+        # so nothing here depends on the individual VM UUIDs.
+        CLUSTER_NAME='{{ .CLUSTER_NAME }}' \
+        KUBERNETES_VERSION='{{ .KUBERNETES_VERSION }}' \
+        TALOS_VERSION='{{ .TALOS_VERSION }}' \
+        MACHINE_CLASS_NAME='{{ .MACHINE_CLASS_NAME }}' \
+        CONTROL_PLANE_SIZE='{{ .CONTROL_PLANE_SIZE }}' \
+        WORKER_SIZE='{{ .WORKER_SIZE }}' \
+          envsubst < templates/cluster-template.yaml.template > {{ .CLUSTER_TEMPLATE }}
+
+        MACHINE_CLASS_NAME='{{ .MACHINE_CLASS_NAME }}' \
+        MACHINE_SELECTOR='{{ .MACHINE_SELECTOR }}' \
+          envsubst < templates/machine-class.yaml.template > {{ .MACHINE_CLASS_TEMPLATE }}
+
+        # Rendered alongside the template: `file:` patches resolve relative to
+        # the template's own directory.
+        envsubst < templates/registry-mirrors.yaml.template > {{ .RENDER_DIR }}/registry-mirrors.yaml
+
+        INSTALL_DISK='{{ .INSTALL_DISK }}' \
+          envsubst < templates/install-disk.yaml.template > {{ .RENDER_DIR }}/install-disk.yaml
+
+        echo "rendered {{ .CLUSTER_TEMPLATE }}: {{ .CONTROL_PLANE_SIZE }} control plane, {{ .WORKER_SIZE }} workers from machine class {{ .MACHINE_CLASS_NAME }} ({{ .VM_COUNT }} machines in the pool)"
+      # Offline structural check -- catches a malformed template before it is sent.
+      - omnictl cluster template validate -f {{ .CLUSTER_TEMPLATE }}
+
+  "cluster:machine-class":
+    desc: Create/update the machine class the cluster allocates from
+    deps: [cluster:template]
+    cmds:
+      # Must exist before the template is synced -- the template references it
+      # by name, and Omni has nothing to allocate from until it is applied.
+      - omnictl apply -f {{ .MACHINE_CLASS_TEMPLATE }}
+
+  "cluster:up":
+    desc: Create/update the cluster from the template (this powers the machines on)
+    deps: [cluster:template]
+    cmds:
+      - task: cluster:machine-class
+      - omnictl cluster template sync -f {{ .CLUSTER_TEMPLATE }}
+      - task: cluster:kubeconfig
+      - |
+        echo
+        echo "cluster {{ .CLUSTER_NAME }} synced. The provider is now powering the"
+        echo "machines on -- 'task cluster:status' to watch it converge."
+        echo
+        echo "  export KUBECONFIG=$(pwd)/{{ .KUBECONFIG_FILE }}"
+
+  "cluster:kubeconfig":
+    desc: Download the cluster's admin kubeconfig
+    cmds:
+      - mkdir -p {{ .OUT_DIR }}
+      # --force: overwrite rather than merge into an existing file (-m defaults true).
+      - omnictl kubeconfig -c {{ .CLUSTER_NAME }} --force {{ .KUBECONFIG_FILE }}
+
+  "cluster:status":
+    desc: Show cluster sync status
+    cmds:
+      - omnictl cluster template status -f {{ .CLUSTER_TEMPLATE }}
+
+  "cluster:down":
+    desc: Delete the cluster (machines return to the pool and power off)
+    cmds:
+      - omnictl cluster template delete -f {{ .CLUSTER_TEMPLATE }}
+      # After the cluster: while it still allocates from the class, the delete is
+      # refused. `|| true` so `down` stays runnable when `up` never created it.
+      - omnictl delete MachineClasses.omni.sidero.dev {{ .MACHINE_CLASS_NAME }} || true
+
+  # ------------------------------------------------------------------- status
+
+  "infra:status":
+    desc: Show the demo's moving parts
+    cmds:
+      - '{{ .VIRSH }} net-list --all'
+      - '{{ .VIRSH }} list --all'
+      - docker ps --filter "name={{ .SUSHY_CONTAINER_PREFIX }}" --filter "name={{ .PROVIDER_CONTAINER }}"
+      - ip -4 addr show dev {{ .LIBVIRT_BRIDGE_IFACE_NAME }} || true
