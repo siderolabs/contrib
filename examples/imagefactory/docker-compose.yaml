@@ -1,0 +1,62 @@
+services:
+  # generated images are pushed to this registry
+  registry:
+    image: registry:2
+    ports:
+      - ${EXTERNAL_IP:-127.0.0.1}:5000:5000
+    volumes:
+      # hint: when generating a large number of different schemas, this volume can grow quite large
+      - registry:/var/lib/registry:rw
+  # upstream ghcr mirror, caches previously pulled image layers and prevents rate limiting
+  registry-ghcr:
+    image: registry:2
+    environment:
+      REGISTRY_PROXY_REMOTEURL: http://ghcr.io
+    volumes:
+      - registry-ghcr:/var/lib/registry:rw
+  # triggers image builds for all schematics defined in `./schematics/*.yaml`
+  schematics:
+    image: alpine:3
+    environment:
+      IMAGE_FACTORY_URL: http://imagefactory:6000
+      REGISTRY_URL: registry:5000
+      TALOS_VERSION: ${SCHEMATICS_TALOS_VERSION?}
+      ARCH: ${SCHEMATICS_TALOS_ARCH?}
+      VALIDATE: ${SCHEMATICS_VALIDATE?}
+      SLEEP_TIME: ${SCHEMATICS_SLEEP_TIME?}
+    command: >
+      /scripts/sync-schematics.sh
+    volumes:
+      - ${PWD}/scripts:/scripts:ro
+      - ${PWD}/schematics:/schematics:ro
+  # container running the actual imagefactory
+  imagefactory:
+    image: ghcr.io/siderolabs/image-factory:${IMGFAC_VERSION?}
+    # required for losetup
+    privileged: true
+    volumes:
+      - ${PWD}/keys:/keys:ro
+      # required for losetup
+      - /dev:/dev
+    ports:
+      - ${EXTERNAL_IP:-127.0.0.1}:6000:6000
+    command: >
+      -http-port=:6000
+      -external-url=http://${IMGFAC_EXTERNAL_URL?}
+      -external-pxe-url=http://${IMGFAC_EXTERNAL_URL?}
+      -cache-signing-key-path=/keys/cache-signing-key.key
+      -cache-repository=registry:5000/cache
+      -insecure-cache-repository=true
+      -image-registry=registry-ghcr:5000
+      -insecure-image-registry=true
+      -schematic-service-repository=registry:5000/image-factory/schematic
+      -insecure-schematic-service-repository
+      -installer-internal-repository=registry:5000/siderolabs
+      -insecure-installer-internal-repository=true
+      -installer-external-repository=${IMGFAC_EXT_REPO?}/siderolabs
+      -secureboot=${IMGFAC_SECUREBOOT?}
+
+volumes:
+  registry:
+  registry-tls:
+  registry-ghcr:
