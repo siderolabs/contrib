@@ -1,0 +1,65 @@
+kind: Cluster
+name: aws
+kubernetes:
+  version: v1.36.2
+  # EKS-like workload bundle. Rendered locally from Helm / upstream release
+  # YAML and synced by Omni once the Kubernetes API is available.
+  #
+  # `mode: full` = Omni continuously reconciles the manifest — matches EKS
+  # addon behavior. Switch a specific manifest to `mode: one-time` if you
+  # want to hand-modify it in-cluster without Omni fighting you back.
+  #
+  # Paths are relative to the working directory when running:
+  #   omnictl cluster template sync -f cluster.yaml
+  # so run omnictl from examples/omni/aws/.
+  manifests:
+    - name: vpc-cni
+      file: manifests/vpc-cni.yaml
+      mode: full
+    - name: ccm
+      file: manifests/ccm.yaml
+      mode: full
+    - name: snapshot-controller
+      file: manifests/snapshot-controller.yaml
+      mode: full
+    - name: ebs-csi
+      file: manifests/ebs-csi.yaml
+      mode: full
+    - name: lb-controller
+      file: manifests/lb-controller.yaml
+      mode: full
+    - name: metrics-server
+      file: manifests/metrics-server.yaml
+      mode: full
+    - name: external-dns
+      file: manifests/external-dns.yaml
+      mode: full
+    - name: cluster-autoscaler
+      file: manifests/cluster-autoscaler.yaml
+      mode: full
+    - name: storageclass-gp3
+      file: manifests/storageclass-gp3.yaml
+      mode: full
+talos:
+  version: v1.13.7
+patches:
+  - file: patches/cluster.yaml
+---
+# CP nodes carry the TalosControlPlane IAM role — they run every controller
+# (VPC-CNI, EBS-CSI, LB Controller, external-dns, cluster-autoscaler,
+# metrics-server, snapshot-controller, CCM) so they need broad AWS perms.
+kind: ControlPlane
+machineClass:
+  name: aws-controlplane
+  size: 3
+patches:
+  - file: patches/controlplane.yaml
+---
+# Workers only run user workloads — TalosWorker role gives them the minimum
+# perms needed (ECR pull, EBS volume attach for CSI-node).
+kind: Workers
+machineClass:
+  name: aws-worker
+  size: 3
+patches:
+  - file: patches/worker.yaml

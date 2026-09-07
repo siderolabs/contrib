@@ -1,0 +1,4 @@
+rendered/
+machineconfig.rendered.yaml
+*.rendered.yaml
+.envrc

@@ -1,0 +1,30 @@
+# Cluster-wide Talos machine-config patch for the AWS EKS-like cluster.
+#
+# Runtime workloads (VPC-CNI, CCM, EBS CSI, LB Controller, snapshot
+# controller, metrics-server, external-dns, cluster-autoscaler, default gp3
+# StorageClass) are delivered via Omni's Kubernetes Manifest Sync, referenced
+# from `kubernetes.manifests[]` in cluster.yaml — not from this patch.
+machine:
+  kubelet:
+    credentialProviderConfig:
+      apiVersion: kubelet.config.k8s.io/v1
+      kind: CredentialProviderConfig
+      providers:
+        - apiVersion: credentialprovider.kubelet.k8s.io/v1
+          name: ecr-credential-provider
+          defaultCacheDuration: 12h
+          matchImages:
+            - "*.dkr.ecr.*.amazonaws.com"
+            - "*.dkr.ecr.*.amazonaws.com.cn"
+            - "*.dkr.ecr-fips.*.amazonaws.com"
+cluster:
+  # Disable default flannel — VPC-CNI takes over pod networking with ENIs.
+  network:
+    cni:
+      name: none
+  # --cloud-provider was removed from kube-apiserver in K8s 1.31+ and from
+  # kubelet in 1.29+. Only controller-manager still accepts it — telling CM
+  # to disable its in-tree cloud loops and defer to the external CCM.
+  controllerManager:
+    extraArgs:
+      cloud-provider: external

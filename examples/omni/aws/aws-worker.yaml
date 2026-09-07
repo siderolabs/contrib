@@ -1,0 +1,26 @@
+# Worker MachineClass. Uses the narrower TalosWorkerNode IAM profile —
+# workers only need ECR pull and EBS attach/detach for CSI-node.
+#
+# Templated fields are substituted with envsubst — see README ("Deploy").
+metadata:
+    namespace: default
+    type: MachineClasses.omni.sidero.dev
+    id: aws-worker
+spec:
+    matchlabels: []
+    autoprovision:
+        providerid: ${OMNI_INFRA_PROVIDER_ID}
+        kernelargs: []
+        metavalues: []
+        providerdata: |
+            volume_size: 20
+            instance_type: t3.medium
+            security_group_ids:
+              - ${AWS_SECURITY_GROUP_ID}
+            arch: amd64
+            subnet_ids:
+              - ${AWS_SUBNET_ID_1}
+              - ${AWS_SUBNET_ID_2}
+              - ${AWS_SUBNET_ID_3}
+            iam_instance_profile_arn: arn:aws:iam::${AWS_ACCOUNT_ID}:instance-profile/TalosWorkerNode
+        grpctunnel: 0

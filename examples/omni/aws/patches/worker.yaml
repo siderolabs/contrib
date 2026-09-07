@@ -1,0 +1,8 @@
+# AWS worker node config. See controlplane.yaml for why install disk is
+# intentionally omitted.
+machine:
+  network:
+    kubespan:
+      enabled: false
+  kubelet:
+    registerWithFQDN: false
