@@ -4,11 +4,9 @@ locals {
   cluster_name_safe = substr(uuidv5("oid", var.cluster_name), 0, 32)
 
   common_machine_config_patch = {
-    machine = {
-      kubelet = {
-        registerWithFQDN = true
-      }
-    }
+    apiVersion       = "v1alpha1"
+    kind             = "KubeNodeConfig"
+    registerWithFQDN = true
   }
 
   ccm_patch_cp = {
