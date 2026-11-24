@@ -1,0 +1,11 @@
+# AWS control-plane node config.
+#
+# Install disk is intentionally omitted — Omni's AWS infra provider picks the
+# right block device based on the instance type (xvda on Xen, nvme0n1 on
+# Nitro), and hardcoding it here would break the wrong-typed instances.
+machine:
+  network:
+    kubespan:
+      enabled: false
+  kubelet:
+    registerWithFQDN: false
